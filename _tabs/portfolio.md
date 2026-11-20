@@ -37,7 +37,7 @@ title: Portfolio
 | 프로젝트 | 내용 | 상태 | 글 |
 |---|---|---|---|
 | Apache Superset | 다운로드 사유 기록 기능 제안(SIP-230), dev@ 논의와 투표 진행 | 투표 중 | [글](/posts/superset-download-reason-sip/) |
-| Apache Superset | MCP API 키 화면이 발급 가능한 범위만 보여 주도록 수정, 500을 400으로 | 승인, 머지 대기 | [글](/posts/superset-api-key-scopes/) |
+| Apache Superset | MCP API 키 화면이 발급 가능한 범위만 보여 주도록 수정, 500을 400으로 | 2026-11 머지 | [글](/posts/superset-api-key-scopes/) |
 | Apache Iceberg | Kafka Connect id-columns 조회에 대소문자 무시 옵션 적용, 에러 메시지 보강 | 리뷰 대기 | [#19042](https://github.com/apache/iceberg/pull/19042) |
 | AWS EMR TCO 시뮬레이터 | YARN 작업 기록 수집 스크립트가 활성 EMR 클러스터를 모두 돌도록 | 리뷰 대기 | [글](/posts/emr-yarn-log-collector/) |
 

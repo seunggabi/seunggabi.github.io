@@ -48,9 +48,9 @@ _[apache/superset#45272](https://github.com/apache/superset/pull/45272)_
 - 허용 목록은 사용자 권한을 `get_user_permissions(user)`로 한 번만 읽어 메모리에서 비교한다. 발급 검증과 목록 계산은 같은 판정 함수(`_user_can_issue_resource_scope`)를 쓴다.
 - 토스트는 `error`를 읽는다.
 
-리뷰어가 승인했고, PR에는 CI가 통과하면 머지하라는 `merge-if-green` 라벨이 붙었다. 2026년 11월 20일 현재 아직 머지 전이다.
+리뷰어가 승인했고, CI가 통과하면 머지하라는 `merge-if-green` 라벨이 붙은 뒤 2026년 11월 21일에 메인테이너가 머지했다.
 
 
 ## English summary
 
-The API key dialog in Apache Superset listed all 32 MCP scopes, but non-admin users could only get a few of them, and choosing a forbidden one returned an HTTP 500 with a generic error. My PR made the dialog show only the scopes the user can issue and turned the failure into a 400 with the reason. After waiting about a month for a committer review, another contributor who hit the same bug reviewed it and found that opening the dialog ran about 97 SQL queries. I changed it to load the user's permissions once, removed the status line from the error message, and the PR was approved with a merge-if-green label.
+The API key dialog in Apache Superset listed all 32 MCP scopes, but non-admin users could only get a few of them, and choosing a forbidden one returned an HTTP 500 with a generic error. My merged PR made the dialog show only the scopes the user can issue and turned the failure into a 400 with the reason. After waiting about a month for a committer review, another contributor who hit the same bug reviewed it and found that opening the dialog ran about 97 SQL queries. I changed it to load the user's permissions once, removed the status line from the error message.
