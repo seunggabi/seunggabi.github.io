@@ -1,8 +1,7 @@
 ---
-# the default layout is 'page'
-icon: fas fa-language
-order: 3
+layout: page
 title: Resume (EN)
+permalink: /resume-en/
 ---
 
 <style>
