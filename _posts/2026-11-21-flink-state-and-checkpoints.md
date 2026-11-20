@@ -18,7 +18,7 @@ Flink 잡이 죽었다 다시 뜨면 세 가지를 맞춰야 한다. 연산자�
 | 타입 | `ValueState`, `ListState`, `MapState`, `ReducingState`, `AggregatingState` | `ListState`(균등 분할 또는 union), broadcast state |
 | 병렬도를 바꿀 때 | key group 단위로 옮겨짐 | 리스트 원소를 나눠 주거나(기본), 전체를 모두에게 줌(union) |
 
-keyed state는 key group으로 묶여 저장된다. key group 수는 최대 병렬도와 같고, 병렬 인스턴스 하나가 key group 여러 개를 맡는다. 병렬도를 바꾸면 key group이 인스턴스 사이로 옮겨 갈 뿐 키가 다시 해시되지는 않는다. 그래서 최대 병렬도는 그 연산자의 상태를 버리지 않고는 바꿀 수 없다. 지정하지 않으면 병렬도 128 이하에서 128로 잡힌다.
+keyed state는 key group으로 묶여 저장된다. key group 수는 최대 병렬도와 같고, 병렬 인스턴스 하나가 key group 여러 개를 맡는다. 병렬도를 바꾸면 key group이 인스턴스 사이로 옮겨 갈 뿐 키가 다시 해시되지는 않는다. 그래서 최대 병렬도는 그 연산자의 상태를 버리지 않고는 바꿀 수 없다. 지정하지 않으면 병렬도의 1.5배를 2의 거듭제곱으로 올린 값(최소 128, 최대 32768)으로 잡혀서, 병렬도 85까지는 128이다.
 
 예시의 클릭 잡이 IP나 기기 ID로 `keyBy`한 뒤 슬라이딩 처리 시간 윈도로 클릭 수를 센다고 하자. 이 윈도 내용이 keyed state다. `sum`은 레코드를 쌓아 두지 않고 윈도마다 누적값 하나만 갱신하므로, 키 하나가 차지하는 상태는 동시에 열린 윈도 수(size / slide)에 비례한다. 반면 Kafka source는 split마다 현재 오프셋을 들고 있다가 체크포인트 때 split 상태로 저장한다.
 
