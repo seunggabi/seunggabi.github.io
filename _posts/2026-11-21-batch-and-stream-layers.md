@@ -1,6 +1,6 @@
 ---
 title: "실시간 테이블과 일별 테이블 중 어느 쪽을 믿을까"
-date: 2026-12-22 09:10:00 +0900
+date: 2026-11-21 03:22:00 +0900
 categories: [Streaming, Spark Streaming]
 tags: [lambda-architecture, kappa-architecture, kafka, spark, flink, iceberg, late-data, concept]
 ---
@@ -114,7 +114,7 @@ dynamic 모드에도 빈틈이 하나 있다. 다시 계산한 결과에 어떤 
 
 ## 참고 자료
 
-- [Nathan Marz, How to beat the CAP theorem (2011)](http://nathanmarz.com/blog/how-to-beat-the-cap-theorem.html)
+- [Nathan Marz, How to beat the CAP theorem (2011)](https://nathanmarz.com/blog/how-to-beat-the-cap-theorem.html)
 - [Nathan Marz, James Warren, Big Data (Manning, 2015)](https://www.manning.com/books/big-data)
 - [Jay Kreps, Questioning the Lambda Architecture (O'Reilly, 2014)](https://www.oreilly.com/radar/questioning-the-lambda-architecture/)
 - [Apache Kafka Topic Configs (retention.ms)](https://kafka.apache.org/44/configuration/topic-configs/)

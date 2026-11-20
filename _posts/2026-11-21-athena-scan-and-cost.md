@@ -1,6 +1,6 @@
 ---
 title: "Athena 쿼리 비용은 어디서 정해질까"
-date: 2026-12-15 09:10:00 +0900
+date: 2026-11-21 03:14:00 +0900
 categories: [Batch & Query, Trino·Athena]
 tags: [athena, trino, partitioning, iceberg, parquet, cost, concept]
 ---

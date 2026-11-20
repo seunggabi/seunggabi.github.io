@@ -15,7 +15,7 @@ title: Resume
 </style>
 
 **김승갑 (Seunggab Kim)** · Data Engineer<br>
-seunggabi@gmail.com · [LinkedIn](https://www.linkedin.com/in/seunggabi/) · [GitHub](https://github.com/seunggabi) · [Blog](https://seunggabi.github.io/)
+seunggabi@gmail.com · [LinkedIn](https://www.linkedin.com/in/seunggabi/) · [GitHub](https://github.com/seunggabi) · [Blog](https://seunggabi.github.io/) · [English](/resume-en/)
 
 10년 차 개발자이고, 그중 8년 넘게 데이터 엔지니어링을 했습니다. CDC, 스트리밍, 레이크하우스로 이어지는 데이터 플랫폼을 만들고 운영합니다. 문제의 원인이 오픈소스에 있으면 업스트림에 직접 고쳐서 올리고, Apache Spark·Superset·Airflow에 머지됐습니다.
 

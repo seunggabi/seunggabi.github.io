@@ -1,6 +1,6 @@
 ---
 title: "AWS 데이터 플랫폼 비용은 어디서 새는가"
-date: 2026-12-29 09:10:00 +0900
+date: 2026-11-21 03:26:00 +0900
 categories: [Platform & Infra, AWS]
 tags: [aws, emr, aws-msk, s3, athena, s3-tables, cost, concept]
 ---

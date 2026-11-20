@@ -1,6 +1,6 @@
 ---
 title: "Flink 잡은 재시작할 때 무엇을 들고 돌아오나"
-date: 2026-12-11 09:10:00 +0900
+date: 2026-11-21 03:10:00 +0900
 categories: [Streaming, Flink]
 tags: [flink, checkpoint, savepoint, state-backend, rocksdb, kafka, exactly-once, concept]
 ---
