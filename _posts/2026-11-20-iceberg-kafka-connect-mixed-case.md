@@ -87,7 +87,7 @@ iceberg.tables.table-name-case-insensitive=false
 
 ## 저장소가 Apache Iceberg로 옮겨 갔다
 
-이 PR은 머지되지 않았다. 올린 날 내가 직접 닫았고, 닫으면서 이유를 적어 두지는 않았다. 저장소 README 맨 위에는 이런 안내가 있다. 코드를 Apache Iceberg 프로젝트에 기증했고, 이 저장소는 더 이상 관리하지 않는다. 지금 커넥터 코드는 `apache/iceberg`의 `kafka-connect` 모듈에 있다.
+이 PR은 머지되지 않았다. 저장소가 더 이상 관리되지 않아서 올린 날 닫았다. 저장소 README 맨 위에는 이런 안내가 있다. 코드를 Apache Iceberg 프로젝트에 기증했고, 이 저장소는 더 이상 관리하지 않는다. 지금 커넥터 코드는 `apache/iceberg`의 `kafka-connect` 모듈에 있다.
 
 2026년 11월 `apache/iceberg` main을 확인해 보니 반만 고쳐져 있었다.
 
@@ -96,8 +96,21 @@ iceberg.tables.table-name-case-insensitive=false
 | 식별자 컬럼을 못 찾으면 NPE | 고쳐짐. `ID column not found: <컬럼>`으로 실패한다 |
 | 동적 라우팅이 테이블 이름을 무조건 소문자로 바꿈 | 그대로. `routeValue.toLowerCase(Locale.ROOT)` |
 
-에러 메시지에 테이블 이름과 실제 컬럼 목록이 빠져 있고, 동적 라우팅에는 여전히 옵션이 없다. 이 두 가지는 Apache Iceberg에 다시 올려 볼 만하다.
+NPE는 사라졌지만 대소문자 문제 자체는 남아 있었다. 에러 메시지에는 테이블 이름과 실제 컬럼 목록이 없고, 식별자 컬럼 조회는 여전히 `schema-case-insensitive`를 타지 않았다.
+
+## Apache Iceberg에 다시 올린 PR
+
+그래서 식별자 컬럼 쪽을 [apache/iceberg#19042](https://github.com/apache/iceberg/pull/19042)로 다시 올렸다. 제목은 "Kafka Connect: Honor schema-case-insensitive for id-columns"다. databricks 때와 달리 새 옵션을 만들지 않고, 이미 있는 옵션이 식별자 컬럼에도 적용되게 했다.
+
+| 바꾼 곳 | 내용 |
+|---|---|
+| `RecordUtils.createTableWriter` | `iceberg.tables.schema-case-insensitive=true`면 `id-columns`를 `Schema.caseInsensitiveFindField`로 찾는다. 기본값(대소문자 구분)은 그대로다 |
+| 에러 메시지 | `ID column not found: ID (table: default.events, columns: id, data, id2)`. 앞부분은 예전 문구 그대로라 기존 로그 검색이 계속 걸린다 |
+| 문서 | `schema-case-insensitive` 설명에 식별자 컬럼에도 적용된다고 적었다 |
+| 테스트 | `TestRecordUtils`에 대소문자가 다를 때 실패하는 경우와, 옵션을 켜면 `ID`가 `id`로 찾아지는 경우를 추가했다 |
+
+옵션을 켜면 레코드의 `ID` 필드는 이미 `id` 컬럼에 써지는데, `id-columns=ID`만 실패하던 어긋남을 맞춘 것이다. 2026년 11월 20일에 올렸고, 지금은 리뷰를 기다리고 있다. 동적 라우팅의 소문자 변환은 이 PR에 넣지 않았다.
 
 ## English summary
 
-The Iceberg Kafka Connect sink crashed with a NullPointerException when an identifier column name differed only by case, because the lookup was case sensitive and had no null check. I also found that dynamic routing always lowercased table names. My PR added a clear error message, an option to keep table name case, and better logs. The repository is no longer maintained, and the code now lives in Apache Iceberg. Apache Iceberg has a null check now, but dynamic routing still lowercases table names.
+The Iceberg Kafka Connect sink crashed with a NullPointerException when an identifier column name differed only by case, because the lookup was case sensitive and had no null check. I also found that dynamic routing always lowercased table names. My first PR added a clear error message, an option to keep table name case, and better logs. I closed it because the repository is no longer maintained, and the code now lives in Apache Iceberg. Apache Iceberg already fixed the NPE, so I opened apache/iceberg#19042 for the rest of the identifier column problem. Instead of adding a new option, it makes the existing schema-case-insensitive option also apply to id-columns, and the error now shows the table and its columns.
