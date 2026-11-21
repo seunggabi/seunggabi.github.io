@@ -16,7 +16,38 @@
   }
   #sidebar li.nav-item:has(> a[href$="/resume/"])::before { content: "커리어"; }
   #sidebar li.nav-item:has(> a[href$="/categories/"])::before { content: "글 찾기"; }
+  .sidebar-intro { padding: 1.25rem 0 0 1.5rem; font-size: .8rem; line-height: 1.6; opacity: .7; }
+  /* Wide screens: Chirpy caps the content at 1250px; use more of the width */
+  @media all and (min-width: 1650px) {
+    #main-wrapper > .container { max-width: 1500px; }
+    #back-to-top { right: max(2rem, calc((100vw - 300px - 1500px) / 2 + 2rem)); }
+  }
+  #access-progress .progress { height: 4px; }
 </style>
+{% assign featured = "superset-epoch-us,spark-session-config-map,pyathena-complex-types,ad-report-batch,spark-streaming-to-hive" | split: "," %}
+<template id="panel-extra">
+  <section id="access-featured">
+    <h2 class="panel-heading">먼저 볼 글</h2>
+    <ul class="content list-unstyled ps-0 pb-1 ms-1 mt-2">
+      {%- for slug in featured -%}
+        {%- assign p = site.posts | where: "slug", slug | first -%}
+        {%- if p %}
+        <li class="text-truncate lh-lg"><a href="{{ p.url | relative_url }}">{{ p.title }}</a></li>
+        {%- endif -%}
+      {%- endfor %}
+    </ul>
+  </section>
+  <section id="access-progress">
+    <h2 class="panel-heading">읽은 글</h2>
+    <div class="content ms-1 mt-2 mb-4">
+      <div class="read-progress-text lh-lg"></div>
+      <div class="progress"><div class="progress-bar"></div></div>
+    </div>
+  </section>
+</template>
+<template id="sidebar-extra">
+  <p class="sidebar-intro">Data Engineer<br>CDC · Streaming · Lakehouse</p>
+</template>
 <script>
   (function () {
     var KEY = 'read-marks';
@@ -26,6 +57,16 @@
       try { localStorage.setItem(KEY, JSON.stringify(Array.from(seen))); } catch (e) {}
     }
     document.addEventListener('DOMContentLoaded', function () {
+      var nav = document.querySelector('#sidebar nav');
+      if (nav) nav.after(document.getElementById('sidebar-extra').content.cloneNode(true));
+      var access = document.querySelector('#panel-wrapper .access');
+      if (access) {
+        access.prepend(document.getElementById('panel-extra').content.cloneNode(true));
+        var total = {{ site.posts.size }};
+        var n = Math.min(seen.size, total);
+        access.querySelector('.read-progress-text').textContent = n + ' / ' + total + '편';
+        access.querySelector('.progress-bar').style.width = (100 * n / total) + '%';
+      }
       document.querySelectorAll('a[href*="/posts/"]').forEach(function (a) {
         var path = new URL(a.href, location.href).pathname;
         if (path !== location.pathname && seen.has(path)) {
