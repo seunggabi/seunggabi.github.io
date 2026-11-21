@@ -1,7 +1,7 @@
 ---
 # the default layout is 'page'
 icon: fas fa-file-lines
-order: 2
+order: 1
 title: Resume
 ---
 

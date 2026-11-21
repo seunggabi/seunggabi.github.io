@@ -3,6 +3,19 @@
   .is-read { opacity: .55; }
   .is-read .card-title::after { content: " · 읽음"; font-size: .7em; font-weight: 400; }
   .read-toggle { margin: .75rem 0; }
+  /* Sidebar section labels: 커리어 (resume, portfolio) and 글 찾기 (categories, tags, archives) */
+  #sidebar li.nav-item:has(> a[href$="/resume/"])::before,
+  #sidebar li.nav-item:has(> a[href$="/categories/"])::before {
+    display: block;
+    margin: 1rem 0 .25rem;
+    padding: .75rem 0 0 1.5rem;
+    border-top: 1px solid var(--sidebar-border-color, rgba(128, 128, 128, .25));
+    font-size: .7rem;
+    letter-spacing: .08em;
+    opacity: .6;
+  }
+  #sidebar li.nav-item:has(> a[href$="/resume/"])::before { content: "커리어"; }
+  #sidebar li.nav-item:has(> a[href$="/categories/"])::before { content: "글 찾기"; }
 </style>
 <script>
   (function () {
