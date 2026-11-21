@@ -1,20 +1,17 @@
-<!-- Read marks: posts opened in this browser are dimmed in every post list. Stored in localStorage only. -->
+<!-- Read marks: the reader marks a post as read with a button on the post page; marked posts are dimmed in every post list. Stored in localStorage only. -->
 <style>
   .is-read { opacity: .55; }
   .is-read .card-title::after { content: " · 읽음"; font-size: .7em; font-weight: 400; }
+  .read-toggle { margin: .75rem 0; }
 </style>
 <script>
   (function () {
-    var KEY = 'read-posts';
-    var read;
-    try { read = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch (e) { return; }
-    var seen = new Set(read);
-    {% if page.layout == 'post' %}
-    if (!seen.has(location.pathname)) {
-      seen.add(location.pathname);
+    var KEY = 'read-marks';
+    var seen;
+    try { seen = new Set(JSON.parse(localStorage.getItem(KEY) || '[]')); } catch (e) { return; }
+    function save() {
       try { localStorage.setItem(KEY, JSON.stringify(Array.from(seen))); } catch (e) {}
     }
-    {% endif %}
     document.addEventListener('DOMContentLoaded', function () {
       document.querySelectorAll('a[href*="/posts/"]').forEach(function (a) {
         var path = new URL(a.href, location.href).pathname;
@@ -22,6 +19,32 @@
           (a.closest('article.card') || a).classList.add('is-read');
         }
       });
+      {% if page.layout == 'post' %}
+      var here = location.pathname;
+      var buttons = [];
+      function render() {
+        var on = seen.has(here);
+        buttons.forEach(function (b) {
+          b.textContent = on ? '읽음 표시됨 (취소)' : '읽음으로 표시';
+          b.className = 'read-toggle btn btn-sm ' + (on ? 'btn-secondary' : 'btn-outline-secondary');
+          b.setAttribute('aria-pressed', on);
+        });
+      }
+      function toggle() {
+        if (seen.has(here)) { seen.delete(here); } else { seen.add(here); }
+        save();
+        render();
+      }
+      [document.querySelector('article header'), document.querySelector('article .content')].forEach(function (anchor, i) {
+        if (!anchor) return;
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.onclick = toggle;
+        if (i === 0) { anchor.appendChild(b); } else { anchor.after(b); }
+        buttons.push(b);
+      });
+      render();
+      {% endif %}
     });
   })();
 </script>
