@@ -93,7 +93,7 @@ iceberg.tables.table-name-case-insensitive=false
 
 | 문제 | Apache Iceberg main |
 |---|---|
-| 식별자 컬럼을 못 찾으면 NPE | 고쳐짐. `ID column not found: <컬럼>`으로 실패한다 |
+| 식별자 컬럼을 못 찾으면 NPE | null 검사만 들어갔다. NPE 대신 `ID column not found: <컬럼>`으로 실패한다 |
 | 동적 라우팅이 테이블 이름을 무조건 소문자로 바꿈 | 그대로. `routeValue.toLowerCase(Locale.ROOT)` |
 
 NPE는 사라졌지만 대소문자 문제 자체는 남아 있었다. 에러 메시지에는 테이블 이름과 실제 컬럼 목록이 없고, 식별자 컬럼 조회는 여전히 `schema-case-insensitive`를 타지 않았다.
@@ -111,6 +111,16 @@ NPE는 사라졌지만 대소문자 문제 자체는 남아 있었다. 에러 �
 
 옵션을 켜면 레코드의 `ID` 필드는 이미 `id` 컬럼에 써지는데, `id-columns=ID`만 실패하던 어긋남을 맞춘 것이다. 2026년 11월 20일에 올렸고, 지금은 리뷰를 기다리고 있다. 동적 라우팅의 소문자 변환은 이 PR에 넣지 않았다.
 
+설정에는 `supplyPlan`, 테이블에는 `supplyplan`인 같은 상황이 시점마다 이렇게 끝난다.
+
+| 시점 | 결과 |
+|---|---|
+| databricks 커넥터 | NPE로 태스크가 죽는다. 어느 테이블, 어느 컬럼인지 로그에 없다 |
+| Apache Iceberg main | `ID column not found: supplyPlan`으로 실패한다. 이유는 보이지만 여전히 죽는다 |
+| #19042 머지 후 | `schema-case-insensitive=true`면 `supplyplan`을 찾아 정상으로 돈다. 옵션을 끄면 테이블 이름과 컬럼 목록이 담긴 에러로 실패한다 |
+
+기본값은 대소문자 구분 그대로라서, 옵션을 켜지 않은 사용자에게 바뀌는 건 에러 메시지뿐이다.
+
 ## English summary
 
-The Iceberg Kafka Connect sink crashed with a NullPointerException when an identifier column name differed only by case, because the lookup was case sensitive and had no null check. I also found that dynamic routing always lowercased table names. My first PR added a clear error message, an option to keep table name case, and better logs. I closed it because the repository is no longer maintained, and the code now lives in Apache Iceberg. Apache Iceberg already fixed the NPE, so I opened apache/iceberg#19042 for the rest of the identifier column problem. Instead of adding a new option, it makes the existing schema-case-insensitive option also apply to id-columns, and the error now shows the table and its columns.
+The Iceberg Kafka Connect sink crashed with a NullPointerException when an identifier column name differed only by case, because the lookup was case sensitive and had no null check. I also found that dynamic routing always lowercased table names. My first PR added a clear error message, an option to keep table name case, and better logs. I closed it because the repository is no longer maintained, and the code now lives in Apache Iceberg. Apache Iceberg added a null check, so the task now fails with a clear message instead of an NPE, but the same config still fails. I opened apache/iceberg#19042 for the rest of the identifier column problem. Instead of adding a new option, it makes the existing schema-case-insensitive option also apply to id-columns, and the error now shows the table and its columns.
