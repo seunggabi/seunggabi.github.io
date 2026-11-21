@@ -68,3 +68,12 @@ title: Portfolio
 {% for p in concept_posts %}
 - [{{ p.title }}]({{ p.url | relative_url }})
 {% endfor %}
+
+## 시스템 디자인
+
+자주 나오는 데이터 시스템 문제를 요구사항, 규모 계산, 구조, 장애 대응 순서로 풀었습니다.
+
+{% assign design_posts = site.tags["system-design"] | sort: "date" %}
+{% for p in design_posts %}
+- [{{ p.title }}]({{ p.url | relative_url }})
+{% endfor %}
