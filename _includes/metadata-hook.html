@@ -23,6 +23,24 @@
     #back-to-top { right: max(2rem, calc((100vw - 300px - 1500px) / 2 + 2rem)); }
   }
   #access-progress .progress { height: 4px; }
+  /* Color chips: tags get a hue from their name, categories from the top-level category. --h is set by the script below. */
+  .chip {
+    background: hsl(var(--h) 70% 94%) !important;
+    color: hsl(var(--h) 55% 30%) !important;
+    border: 1px solid hsl(var(--h) 45% 82%) !important;
+  }
+  a.chip:hover { background: hsl(var(--h) 70% 88%) !important; }
+  .post-meta .categories.chip { padding: 0 .45rem; border-radius: .6rem; font-size: .85em; }
+  .card.categories.chip-card { border-left: 4px solid hsl(var(--h) 55% 55%) !important; }
+  .card.categories.chip-card .card-header a { color: hsl(var(--h) 55% 32%); }
+  html[data-mode="dark"] .chip { background: hsl(var(--h) 25% 20%) !important; color: hsl(var(--h) 70% 80%) !important; border-color: hsl(var(--h) 30% 32%) !important; }
+  html[data-mode="dark"] a.chip:hover { background: hsl(var(--h) 25% 26%) !important; }
+  html[data-mode="dark"] .card.categories.chip-card .card-header a { color: hsl(var(--h) 70% 78%); }
+  @media (prefers-color-scheme: dark) {
+    html:not([data-mode="light"]) .chip { background: hsl(var(--h) 25% 20%) !important; color: hsl(var(--h) 70% 80%) !important; border-color: hsl(var(--h) 30% 32%) !important; }
+    html:not([data-mode="light"]) a.chip:hover { background: hsl(var(--h) 25% 26%) !important; }
+    html:not([data-mode="light"]) .card.categories.chip-card .card-header a { color: hsl(var(--h) 70% 78%); }
+  }
 </style>
 {% assign featured = "superset-epoch-us,spark-session-config-map,pyathena-complex-types,ad-report-batch,spark-streaming-to-hive" | split: "," %}
 <template id="panel-extra">
@@ -57,6 +75,31 @@
       try { localStorage.setItem(KEY, JSON.stringify(Array.from(seen))); } catch (e) {}
     }
     document.addEventListener('DOMContentLoaded', function () {
+      /* Category hues follow the top-level categories in tech-map.md; tags hash into a fixed hue set.
+         No line comments in this file: the theme compresses HTML onto one line. */
+      var CAT_HUE = {
+        'Ingestion & CDC': 25, 'Streaming': 205, 'Batch & Query': 265, 'Lakehouse & Storage': 165,
+        'Orchestration': 42, 'Transformation & Modeling': 330, 'BI & Serving': 5, 'Data Quality': 130,
+        'Platform & Infra': 225, 'AI & Tooling': 290, 'System Design': 185, 'Career': 95
+      };
+      var TAG_HUES = [5, 25, 42, 95, 130, 165, 185, 205, 225, 265, 290, 330];
+      function tagHue(name) {
+        var h = 0;
+        for (var i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
+        return TAG_HUES[h % TAG_HUES.length];
+      }
+      function paint(el, hue) { el.classList.add('chip'); el.style.setProperty('--h', hue); }
+      document.querySelectorAll('a.post-tag').forEach(function (a) { paint(a, tagHue(a.textContent.trim().toLowerCase())); });
+      document.querySelectorAll('#tags a.tag').forEach(function (a) { paint(a, tagHue(a.firstChild.textContent.trim().toLowerCase())); });
+      document.querySelectorAll('.post-meta .categories').forEach(function (s) {
+        var hue = CAT_HUE[s.textContent.split(',')[0].trim()];
+        if (hue !== undefined) paint(s, hue);
+      });
+      document.querySelectorAll('.card.categories').forEach(function (c) {
+        var a = c.querySelector('.card-header a');
+        var hue = a && CAT_HUE[a.textContent.trim()];
+        if (hue !== undefined) { c.classList.add('chip-card'); c.style.setProperty('--h', hue); }
+      });
       var nav = document.querySelector('#sidebar nav');
       if (nav) nav.after(document.getElementById('sidebar-extra').content.cloneNode(true));
       var access = document.querySelector('#panel-wrapper .access');
