@@ -1,0 +1,27 @@
+<!-- Read marks: posts opened in this browser are dimmed in every post list. Stored in localStorage only. -->
+<style>
+  .is-read { opacity: .55; }
+  .is-read .card-title::after { content: " · 읽음"; font-size: .7em; font-weight: 400; }
+</style>
+<script>
+  (function () {
+    var KEY = 'read-posts';
+    var read;
+    try { read = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch (e) { return; }
+    var seen = new Set(read);
+    {% if page.layout == 'post' %}
+    if (!seen.has(location.pathname)) {
+      seen.add(location.pathname);
+      try { localStorage.setItem(KEY, JSON.stringify(Array.from(seen))); } catch (e) {}
+    }
+    {% endif %}
+    document.addEventListener('DOMContentLoaded', function () {
+      document.querySelectorAll('a[href*="/posts/"]').forEach(function (a) {
+        var path = new URL(a.href, location.href).pathname;
+        if (path !== location.pathname && seen.has(path)) {
+          (a.closest('article.card') || a).classList.add('is-read');
+        }
+      });
+    });
+  })();
+</script>
