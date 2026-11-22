@@ -737,7 +737,7 @@
     });
   })();
 </script>
-<!-- Keyboard shortcuts: / search, n newer post, p older post, t top, ? help. Ignored while typing or with modifier keys. -->
+<!-- Keyboard shortcuts: / search, n newer post, p older post, r random unread post, t top, ? help. Ignored while typing or with modifier keys. -->
 <style>
   #kbd-help { position: fixed; inset: 0; z-index: 2000; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,.45); }
   #kbd-help[hidden] { display: none; }
@@ -764,6 +764,16 @@
         }
         return null;
       }
+      function randomPost() {
+        fetch('/posts.json').then(function (r) { return r.json(); }).then(function (list) {
+          var seen = [];
+          try { seen = JSON.parse(localStorage.getItem('read-marks') || '[]'); } catch (e) {}
+          var here = location.pathname;
+          var pool = list.filter(function (p) { return p.url !== here && seen.indexOf(p.url) < 0; });
+          if (!pool.length) pool = list.filter(function (p) { return p.url !== here; });
+          if (pool.length) location.href = pool[Math.floor(Math.random() * pool.length)].url;
+        }).catch(function () {});
+      }
       function build() {
         help = document.createElement('div');
         help.id = 'kbd-help';
@@ -773,6 +783,7 @@
           '<dt><kbd>/</kbd></dt><dd>검색</dd>' +
           '<dt><kbd>n</kbd></dt><dd>다음(최신) 글</dd>' +
           '<dt><kbd>p</kbd></dt><dd>이전(오래된) 글</dd>' +
+          '<dt><kbd>r</kbd></dt><dd>안 읽은 글 랜덤 이동</dd>' +
           '<dt><kbd>t</kbd></dt><dd>맨 위로</dd>' +
           '<dt><kbd>?</kbd></dt><dd>이 도움말</dd></dl>' +
           '<button type="button" class="btn btn-sm btn-primary">닫기</button></div>';
@@ -807,6 +818,7 @@
             break;
           case 'n': go = navLink('newer'); break;
           case 'p': go = navLink('older'); break;
+          case 'r': randomPost(); break;
           case 't': window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); break;
           case '?': e.preventDefault(); open(); break;
         }
