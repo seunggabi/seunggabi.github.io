@@ -1,0 +1,6 @@
+---
+layout: none
+permalink: /posts.json
+sitemap: false
+---
+[{% for p in site.posts %}{"url":{{ p.url | jsonify }},"title":{{ p.title | jsonify }}}{% unless forloop.last %},{% endunless %}{% endfor %}]
