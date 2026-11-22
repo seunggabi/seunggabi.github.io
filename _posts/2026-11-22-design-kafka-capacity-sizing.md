@@ -1,6 +1,6 @@
 ---
 title: "초당 10만 건 이벤트로 Kafka 파티션, 디스크, 네트워크 크기 잡기"
-date: 2026-11-22 17:10:00 +0900
+date: 2026-11-22 15:40:00 +0900
 categories: [System Design, Messaging]
 tags: [kafka, capacity-planning, partition, replication, system-design]
 ---
