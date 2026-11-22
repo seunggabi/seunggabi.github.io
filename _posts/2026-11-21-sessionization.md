@@ -112,7 +112,7 @@ gap에는 행마다 다른 값을 주는 식도 쓸 수 있고, 0 이하로 계�
 
 ## Flink 세션 윈도
 
-DataStream API에서는 `EventTimeSessionWindows.withGap(Duration.ofMinutes(30))`을 쓰고, 행마다 gap을 다르게 하려면 `withDynamicGap`에 `SessionWindowTimeGapExtractor`를 넘긴다. 레코드마다 윈도를 만들고 gap 안의 윈도를 합치므로 병합을 지원하는 트리거와 `ReduceFunction`, `AggregateFunction`, `ProcessWindowFunction` 같은 윈도 함수를 써야 한다. 윈도 종류와 워터마크는 [Flink 시간과 윈도 글](/posts/flink-time-and-windows/)에 있다. 세션 윈도에서 allowed lateness 안의 늦은 레코드는 두 윈도 사이를 이어 합칠 수 있고, 합쳐진 윈도가 다시 발화한다. 배치에서 본 "늦은 이벤트가 세션을 합친다"가 스트림에서는 갱신 결과로 나온다. SQL에서는 `SESSION` 윈도 TVF를 쓴다.
+DataStream API에서는 `EventTimeSessionWindows.withGap(Duration.ofMinutes(30))`을 쓰고, 행마다 gap을 다르게 하려면 `withDynamicGap`에 `SessionWindowTimeGapExtractor`를 넘긴다. 레코드마다 윈도를 만들고 gap 안의 윈도를 합치므로 병합을 지원하는 트리거와 `ReduceFunction`, `AggregateFunction`, `ProcessWindowFunction` 같은 윈도 함수를 써야 한다. 세션 윈도에서 allowed lateness 안의 늦은 레코드는 두 윈도 사이를 이어 합칠 수 있고, 합쳐진 윈도가 다시 발화한다. 배치에서 본 "늦은 이벤트가 세션을 합친다"가 스트림에서는 갱신 결과로 나온다. SQL에서는 `SESSION` 윈도 TVF를 쓴다.
 
 ```sql
 -- Flink 2.3 SQL, 스트리밍 모드

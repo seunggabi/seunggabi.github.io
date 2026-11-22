@@ -77,7 +77,7 @@ FROM impressions i LEFT JOIN clicks c
  AND c.click_ts BETWEEN i.imp_ts AND i.imp_ts + INTERVAL '1' MINUTE;
 ```
 
-1)의 `Join` 노드에는 insert 말고 삭제가 포함된 모드가, 2)의 `IntervalJoin` 노드에는 insert만 붙어야 한다(planner 소스의 추론 규칙에서 읽은 기대값이고, 출력 문자열을 직접 확인하지는 않았다). 2)에서 클릭은 노출 시각부터 1분 뒤까지만 맞는다. 바꿔 말하면 노출은 `[click_ts - 1분, click_ts]` 안에 있어야 한다. 연산자의 워터마크(두 입력 워터마크 중 작은 값)가 `imp_ts + 1분`을 넘으면 그 노출과 맞을 클릭은 더 오지 않으니 노출 행을 지운다. 클릭 행은 워터마크가 `click_ts`를 넘으면 지운다. LEFT JOIN이면 지우는 그 순간에 한 번도 짝을 못 찾은 노출을 `[노출, null]`로 낸다. 짝이 없다는 판단을 시간이 확정한 뒤에 내므로 되돌릴 일이 없고, 출력이 append-only로 남는다. 대신 null 행은 시간 범위와 워터마크 지연만큼 늦게 나온다. 워터마크가 멈추는 경우는 [Flink 시간과 윈도 글](/posts/flink-time-and-windows/)에 정리했다.
+1)의 `Join` 노드에는 insert 말고 삭제가 포함된 모드가, 2)의 `IntervalJoin` 노드에는 insert만 붙어야 한다(planner 소스의 추론 규칙에서 읽은 기대값이고, 출력 문자열을 직접 확인하지는 않았다). 2)에서 클릭은 노출 시각부터 1분 뒤까지만 맞는다. 바꿔 말하면 노출은 `[click_ts - 1분, click_ts]` 안에 있어야 한다. 연산자의 워터마크(두 입력 워터마크 중 작은 값)가 `imp_ts + 1분`을 넘으면 그 노출과 맞을 클릭은 더 오지 않으니 노출 행을 지운다. 클릭 행은 워터마크가 `click_ts`를 넘으면 지운다. LEFT JOIN이면 지우는 그 순간에 한 번도 짝을 못 찾은 노출을 `[노출, null]`로 낸다. 짝이 없다는 판단을 시간이 확정한 뒤에 내므로 되돌릴 일이 없고, 출력이 append-only로 남는다. 대신 null 행은 시간 범위와 워터마크 지연만큼 늦게 나온다.
 
 ## 그때의 값을 붙이는 temporal join, 지금 값을 붙이는 lookup join
 
