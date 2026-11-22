@@ -14,7 +14,7 @@ title: Portfolio
 
 | 분야 | 한 일 | 기술 | 글 |
 |---|---|---|---|
-| 결제 서비스 데이터 플랫폼 (현재) | MySQL 테이블 수백 개를 CDC로 Iceberg 레이크하우스에 1분 이내 반영, 앱 이벤트 로그 하루 수백만 건(Kafka·Flink), Airflow DAG 1,000여 개와 EMR Spark 배치, Superset 대시보드 100여 개·DataHub 운영 | Debezium, Kafka Connect, Amazon MSK, Iceberg, Flink, Spark, Airflow, Athena, Superset, DataHub, Terraform | - |
+| 결제 서비스 데이터 플랫폼 (현재) | MySQL 테이블 수백 개를 CDC로 Iceberg 레이크하우스에 1분 이내 반영, 앱 이벤트 로그 하루 수백만 건(Kafka·Flink), Airflow DAG 1,000여 개와 EMR Spark 배치, Superset 대시보드 100여 개·DataHub 운영 | Debezium, Kafka Connect, Amazon MSK, Iceberg, Flink, Spark, Airflow, Athena, Superset, DataHub, Terraform | [Airflow DAG 1,200개 운영](/posts/airflow-1000-dags/) |
 | 모빌리티 서비스 데이터 배치 | 모노 레포와 공용 core 모듈로 배치 잡 수십 개를 통합해 신규 잡 개발 기간을 3일에서 몇 시간으로 단축, Airflow DAG 버전 관리 개선, Hive·DynamoDB·S3를 오가는 Kotlin 배치 잡 | Kotlin, Airflow, Hive, DynamoDB, S3, Athena | - |
 | 커머스 광고 데이터 | 광고 리포트 배치(Spark 잡과 Spring Batch), 서비스 아홉 개의 빌드·배포 구조(배포 워크플로 21개), OLAP 동기화를 Kafka 비동기로 바꿔 동기화 장애 0건 | Kotlin, Spring Boot, Spring Batch, Spark on EMR, Kafka, MySQL, GitHub Actions, Gradle | [Kafka 구독 전환](/posts/api-sync-to-kafka-subscribe/) |
 | 음악·오디오 서비스 데이터 | 하루 수억 건 로그의 수집 API부터 Hive·Spark 지표 배치 수십 개, 사용자 수백만 명의 연말 결산, 대시보드까지 | Spring Boot, Kafka, Logstash, Spark Streaming, Spark SQL, PySpark, Hive, ORC, HBase, MySQL, Django, Vue, Celery, Zeppelin | [수집 API](/posts/log-collection-api/), [스트리밍 적재](/posts/spark-streaming-to-hive/), [Logstash 중계](/posts/logstash-kafka-relay/), [지표 배치](/posts/pyspark-indicator-batch/), [연말 결산](/posts/year-end-recap-spark/), [대시보드 API](/posts/metrics-dashboard-api/) |
