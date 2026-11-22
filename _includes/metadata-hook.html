@@ -1,4 +1,5 @@
 <!-- Read marks: the reader marks a post as read with a button on the post page; marked posts are dimmed in every post list. Stored in localStorage; when site.firebase is configured, a Google sign-in syncs them across browsers through Firestore (users/{uid}.reads). -->
+<link rel="alternate" type="application/atom+xml" title="{{ site.title }}" href="{{ '/feed.xml' | relative_url }}">
 <style>
   .is-read { opacity: .55; }
   .is-read .card-title::after { content: " · 읽음"; font-size: .7em; font-weight: 400; }
@@ -37,6 +38,12 @@
     background: color-mix(in srgb, var(--text-muted-color, #6c757d) 14%, transparent);
   }
   .read-progress { position: fixed; top: 0; left: 0; height: 3px; width: 0; background: var(--link-color, #2a7ae2); z-index: 1100; pointer-events: none; transition: width .08s linear; }
+  #resume-toast { position: fixed; left: 1rem; bottom: 1rem; z-index: 1050; display: flex; align-items: center; gap: .25rem; padding: .25rem .4rem; border-radius: 999px; background: var(--card-bg, #fff); border: 1px solid var(--main-border-color, rgba(128,128,128,.3)); box-shadow: 0 4px 14px rgba(0,0,0,.25); }
+  #resume-toast .toast-close { border: 0; background: none; padding: 0 .45rem; font-size: 1.1rem; line-height: 1; color: var(--text-muted-color, #6c757d); cursor: pointer; }
+  @media print {
+    #sidebar, #topbar-wrapper, #panel-wrapper, #tail-wrapper, #back-to-top, #music-nudge, #music-side, #search-result-wrapper, #resume-toast, .read-progress, .read-toggle, .later-toggle, .post-stats, #comments, .giscus, giscus-widget { display: none !important; }
+    body { background: #fff !important; color: #000 !important; }
+  }
   .later-toggle { margin: .75rem 0 .75rem .5rem; }
   .later-remove { border: 0; background: none; padding: 0; font-size: inherit; color: var(--link-color, #2a7ae2); cursor: pointer; }
   .later-remove:hover { text-decoration: underline; }
@@ -412,6 +419,40 @@
       }
       listeners.push(renderLater);
       renderLater();
+      var POS_KEY = 'read-pos:' + here;
+      var posTimer = null;
+      function maxScroll() { var h = document.documentElement; return h.scrollHeight - h.clientHeight; }
+      function savePos() {
+        posTimer = null;
+        var max = maxScroll();
+        if (max <= 0) return;
+        var ratio = window.scrollY / max;
+        try {
+          if (ratio < 0.05 || ratio > 0.97) { localStorage.removeItem(POS_KEY); } else { localStorage.setItem(POS_KEY, String(ratio)); }
+        } catch (e) {}
+      }
+      window.addEventListener('scroll', function () { if (!posTimer) posTimer = setTimeout(savePos, 800); }, { passive: true });
+      var savedRatio = NaN;
+      try { savedRatio = parseFloat(localStorage.getItem(POS_KEY)); } catch (e) {}
+      if (savedRatio > 0.05 && savedRatio < 0.97 && !location.hash && window.scrollY < 200) {
+        var toast = document.createElement('div');
+        toast.id = 'resume-toast';
+        var go = document.createElement('button');
+        go.type = 'button';
+        go.className = 'ux-pill';
+        go.textContent = '이어 읽기 · ' + Math.round(savedRatio * 100) + '%';
+        go.onclick = function () { window.scrollTo({ top: savedRatio * maxScroll(), behavior: 'smooth' }); toast.remove(); };
+        var close = document.createElement('button');
+        close.type = 'button';
+        close.className = 'toast-close';
+        close.setAttribute('aria-label', '닫기');
+        close.textContent = '×';
+        close.onclick = function () { toast.remove(); };
+        toast.appendChild(go);
+        toast.appendChild(close);
+        document.body.appendChild(toast);
+        setTimeout(function () { toast.remove(); }, 15000);
+      }
       statsEl = document.createElement('div');
       statsEl.className = 'post-stats';
       statsEl.hidden = true;
