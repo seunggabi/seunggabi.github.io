@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Time - 배경음악</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #111; color: #ccc; font: 13px/1.5 system-ui, sans-serif; }
+  .wrap { display: flex; flex-direction: column; height: 100%; }
+  iframe { flex: 1; width: 100%; border: 0; }
+  p { margin: 0; padding: 6px 10px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <iframe id="player" title="Time - 10 Hours" allow="autoplay; encrypted-media" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+  <p>이 창을 열어 두면 블로그 글을 옮겨 다녀도 계속 재생됩니다. 소리가 안 나면 영상의 재생 버튼을 누르세요.</p>
+</div>
+<script>
+  var VIDEO_ID = 'LqRZ2_w56U0';
+  document.getElementById('player').src =
+    'https://www.youtube.com/embed/' + VIDEO_ID + '?autoplay=1&loop=1&playlist=' + VIDEO_ID + '&rel=0';
+</script>
+</body>
+</html>

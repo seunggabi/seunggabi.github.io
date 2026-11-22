@@ -23,6 +23,26 @@
     #back-to-top { right: max(2rem, calc((100vw - 300px - 1500px) / 2 + 2rem)); }
   }
   #access-progress .progress { height: 4px; }
+  /* Background music: a button that opens /music/ in a small window so playback survives page changes, plus a one-time nudge. */
+  #music-btn {
+    position: fixed; left: 1.25rem; bottom: 1.25rem; z-index: 1040;
+    width: 2.75rem; height: 2.75rem; border-radius: 50%; border: 1px solid var(--btn-border-color, rgba(128,128,128,.3));
+    background: var(--card-bg, #fff); color: var(--text-color, #333); box-shadow: 0 2px 8px rgba(0,0,0,.15); cursor: pointer;
+  }
+  #music-nudge {
+    position: fixed; left: 1.25rem; bottom: 4.6rem; z-index: 1040; max-width: 15rem;
+    padding: .7rem .85rem; border-radius: .6rem; font-size: .85rem; line-height: 1.5;
+    background: var(--card-bg, #fff); color: var(--text-color, #333); border: 1px solid var(--btn-border-color, rgba(128,128,128,.3));
+    box-shadow: 0 4px 14px rgba(0,0,0,.18);
+  }
+  #music-nudge[hidden] { display: none; }
+  #music-nudge .actions { margin-top: .5rem; display: flex; gap: .4rem; justify-content: flex-end; }
+  #music-side { display: none; }
+  @media all and (min-width: 850px) {
+    #music-btn { display: none; }
+    #music-side { display: inline-block; }
+    #music-nudge { left: 1rem; bottom: 3.25rem; }
+  }
   /* Color chips: tags get a hue from their name, categories from the top-level category. --h is set by the script below. */
   .chip {
     background: hsl(var(--h) 70% 94%) !important;
@@ -63,6 +83,16 @@
     </div>
   </section>
 </template>
+<template id="music-extra">
+  <button type="button" id="music-btn" aria-label="배경음악 창 열기" title="배경음악: Hans Zimmer - Time"><i class="fas fa-music"></i></button>
+  <div id="music-nudge" role="dialog" aria-label="배경음악 안내" hidden>
+    읽는 동안 Hans Zimmer의 Time을 틀어 둘까요? 작은 창에서 재생돼서 글을 옮겨도 이어집니다.
+    <div class="actions">
+      <button type="button" class="btn btn-sm btn-outline-secondary" data-music="close">괜찮아요</button>
+      <button type="button" class="btn btn-sm btn-primary" data-music="play">재생</button>
+    </div>
+  </div>
+</template>
 <template id="sidebar-extra">
   <p class="sidebar-intro">Data Engineer<br>Batch · Streaming · CDC · Lakehouse<br>Spark · Airflow · Kafka · Flink · EMR</p>
 </template>
@@ -100,6 +130,40 @@
         var hue = a && CAT_HUE[a.textContent.trim()];
         if (hue !== undefined) { c.classList.add('chip-card'); c.style.setProperty('--h', hue); }
       });
+      document.body.appendChild(document.getElementById('music-extra').content.cloneNode(true));
+      var sideBottom = document.querySelector('#sidebar .sidebar-bottom');
+      if (sideBottom) {
+        var side = document.createElement('button');
+        side.type = 'button';
+        side.id = 'music-side';
+        side.className = 'btn btn-link nav-link';
+        side.setAttribute('aria-label', '배경음악 창 열기');
+        side.title = '배경음악: Hans Zimmer - Time';
+        side.innerHTML = '<i class="fas fa-music"></i>';
+        var modeGroup = sideBottom.querySelector('.btn-group');
+        if (modeGroup) { modeGroup.after(side); } else { sideBottom.prepend(side); }
+      }
+      var nudge = document.getElementById('music-nudge');
+      function openMusic() {
+        var w = window.open('', 'blog-music', 'width=380,height=300');
+        if (!w) { window.open('{{ "/music/" | relative_url }}', '_blank'); return; }
+        try { if (w.location.href === 'about:blank') w.location.href = '{{ "/music/" | relative_url }}'; } catch (e) {}
+        w.focus();
+      }
+      function hideNudge() {
+        nudge.hidden = true;
+        try { sessionStorage.setItem('music-nudge', '1'); } catch (e) {}
+      }
+      document.getElementById('music-btn').onclick = function () { hideNudge(); openMusic(); };
+      if (document.getElementById('music-side')) document.getElementById('music-side').onclick = function () { hideNudge(); openMusic(); };
+      nudge.querySelector('[data-music="play"]').onclick = function () { hideNudge(); openMusic(); };
+      nudge.querySelector('[data-music="close"]').onclick = hideNudge;
+      var nudged = false;
+      try { nudged = sessionStorage.getItem('music-nudge') === '1'; } catch (e) {}
+      if (!nudged) {
+        setTimeout(function () { if (nudge) nudge.hidden = false; }, 3000);
+        setTimeout(function () { if (!nudge.hidden) hideNudge(); }, 15000);
+      }
       var nav = document.querySelector('#sidebar nav');
       if (nav) nav.after(document.getElementById('sidebar-extra').content.cloneNode(true));
       var access = document.querySelector('#panel-wrapper .access');
