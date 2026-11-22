@@ -390,6 +390,10 @@
       statsEl.hidden = true;
       if (buttons[0]) buttons[0].after(statsEl);
       {% endif %}
+      if (/^\s*\|/.test(document.title)) {
+        var heading = document.querySelector('h1');
+        if (heading && heading.textContent.trim()) document.title = heading.textContent.trim() + ' | ' + {{ site.title | jsonify }};
+      }
       document.addEventListener('keydown', function (e) {
         var t = e.target;
         if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey || (t && (/^(input|textarea|select)$/i.test(t.tagName) || t.isContentEditable))) return;
