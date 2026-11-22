@@ -23,6 +23,7 @@ SELECT * FROM ad_group WHERE campaign_id = 103
 | lazy loading | 연관 객체를 처음 접근하는 순간 쿼리로 읽어 오는 ORM 동작 |
 | fetch join | 연관 데이터를 조인으로 한 쿼리에 같이 읽는 방법 |
 | batch fetch | 연관 데이터를 부모 키 여러 개의 `IN` 목록으로 묶어 읽는 방법 |
+| proxy | Hibernate가 LAZY 다대일·일대일 연관 자리에 넣어 두는 대리 객체. id가 아닌 값을 처음 읽을 때 SELECT를 낸다 |
 | raiseload | 지연 로딩이 일어나면 쿼리 대신 예외를 내게 하는 SQLAlchemy 설정 |
 
 ## ORM은 같은 일을 속성 접근 뒤에 숨긴다
@@ -36,11 +37,52 @@ for c in campaigns:
     rows.extend(to_row(c, g) for g in c.ad_groups)   # 여기서 캠페인마다 SELECT 1번
 ```
 
-SQLAlchemy의 relationship 기본 로딩 전략은 `select`, 곧 접근할 때 따로 읽는 방식이다. Django도 `campaign.adgroup_set.all()`을 루프에서 부르면 같은 일이 생긴다. JPA는 `@ManyToOne`과 `@OneToOne`의 기본 fetch가 `EAGER`인데, 즉시 로딩이 N+1을 막아 주지는 않는다. Hibernate에서 JPQL로 `select g from AdGroup g`를 실행하면 광고 그룹 목록을 먼저 읽고, 조인으로 가져오지 않은 `EAGER` 연관 `campaign`은 서로 다른 캠페인 id마다 추가 쿼리로 채운다. 쿼리가 언제 나가는지만 바뀐다.
+SQLAlchemy의 relationship 기본 로딩 전략은 `select`, 곧 접근할 때 따로 읽는 방식이다. Django도 `campaign.adgroup_set.all()`을 루프에서 부르면 같은 일이 생긴다.
+
+## JPA의 LAZY는 읽는 시점만 정한다
+
+JPA는 `@OneToMany`·`@ManyToMany`의 기본 fetch가 `LAZY`, `@ManyToOne`·`@OneToOne`이 `EAGER`다. LAZY로 두면 Hibernate는 연관 자리에 진짜 데이터 대신 프록시나 초기화 전 컬렉션을 넣는다. `@ManyToOne`에는 프록시 객체가, 컬렉션에는 아직 초기화되지 않은 `PersistentBag`이 들어간다. SELECT는 그것을 처음 쓸 때 나간다.
+
+```java
+@Entity
+class Campaign {
+    @Id Long id;
+    String name;
+    @OneToMany(mappedBy = "campaign")            // 기본 LAZY
+    List<AdGroup> adGroups = new ArrayList<>();
+}
+
+@Entity
+class AdGroup {
+    @Id Long id;
+    String name;
+    @ManyToOne(fetch = FetchType.LAZY)           // 기본이 EAGER라 명시한다
+    @JoinColumn(name = "campaign_id")
+    Campaign campaign;
+}
+```
+
+```java
+List<Campaign> cs = em.createQuery("select c from Campaign c", Campaign.class).getResultList(); // SELECT 1번
+for (Campaign c : cs) {
+    List<AdGroup> gs = c.adGroups;   // 아직 안 나간다. 초기화 전 컬렉션만 꺼낸다
+    gs.size();                       // 여기서 SELECT ... FROM ad_group WHERE campaign_id = ?
+}
+```
+
+컬렉션을 순회하거나 `size()`를 부를 때, 프록시에서 id가 아닌 값의 getter(`getName()` 등)를 부를 때 쿼리가 나간다. 프록시는 메서드 호출을 가로채므로, 프록시의 필드를 직접 읽으면 초기화되지 않은 빈 값이 나온다. 프록시는 외래 키 값을 이미 들고 있어서 `g.campaign.getId()`는 쿼리를 내지 않는다. 세션이 닫힌 뒤에 초기화 전 연관을 건드리면 `LazyInitializationException`이 난다.
+
+그래서 LAZY는 N+1을 고치는 설정이 아니다. 루프에서 하나씩 건드릴 때마다 SELECT가 나가는 것이 바로 N+1이다. EAGER로 바꾸면 그 N번이 목록을 읽자마자 나갈 뿐이다. Hibernate에서 JPQL로 `select g from AdGroup g`를 실행하면 광고 그룹 목록을 먼저 읽고, 조인으로 가져오지 않은 `EAGER` 연관 `campaign`은 서로 다른 캠페인 id마다 추가 쿼리로 채운다. 연관이 필요 없는 화면에서도 매번 읽는다. 연관은 모두 LAZY로 두고, 연관이 필요한 쿼리에서만 함께 읽는 방법을 정하는 것이 출발점이다.
+
+## 지연 로딩은 다른 지연 로딩을 부른다
+
+캠페인, 광고 그룹, 키워드처럼 연관이 이어지면 단계마다 곱해진다. 캠페인 1,000개에 캠페인당 광고 그룹이 50개면 캠페인 목록 1번, 광고 그룹 1,000번, 키워드 5만 번이다. EAGER는 코드에서 아무것도 건드리지 않아도 추가 쿼리를 부른다. `select g from AdGroup g` 한 줄이 서로 다른 캠페인 수만큼 SELECT를 더 내고, 캠페인에 EAGER 연관이 더 있으면 그 SELECT마다 조인이 붙어 무거워진다.
+
+코드에 보이지 않는 접근도 있다. 엔티티를 그대로 JSON으로 내보내면 Jackson이 getter를 따라가며 지연 컬렉션을 하나씩 연다. 연관 필드를 쓰는 `toString()`도 같다. Spring Boot의 `spring.jpa.open-in-view`는 기본값이 `true`라 응답을 직렬화하는 동안에도 세션이 열려 있고, 서비스 코드가 끝난 뒤에 쿼리가 나간다. `false`로 두면 이런 접근이 `LazyInitializationException`으로 드러난다. 응답을 엔티티 대신 필요한 컬럼만 담은 DTO로 만들면 직렬화가 로딩을 부를 길이 아예 없다.
 
 ## 횟수로 찾는다
 
-그래서 시간이 아니라 실행 횟수를 봐야 한다.
+쿼리 하나하나는 빠르니 시간이 아니라 실행 횟수를 봐야 한다.
 
 | 어디서 | 무엇을 본다 |
 |---|---|
@@ -48,9 +90,21 @@ SQLAlchemy의 relationship 기본 로딩 전략은 `select`, 곧 접근할 때 �
 | MySQL | `performance_schema.events_statements_summary_by_digest`의 `COUNT_STAR` |
 | SQLAlchemy | `create_engine(..., echo=True)`로 쿼리 로그를 보고, 테스트에서는 `lazy="raise"`나 `raiseload()`로 지연 로딩을 예외로 바꾼다 |
 | Django | 테스트에서 `assertNumQueries(n)`로 쿼리 수를 고정한다 |
-| Hibernate | `hibernate.generate_statistics`로 세션별 쿼리 수를 남긴다 |
+| Hibernate | `hibernate.generate_statistics`로 SessionFactory 단위 쿼리 수를 모은다. 세션별 수치는 세션이 닫힐 때 로그로 남는다 |
 
-데이터 3건짜리 테스트에서 N+1은 쿼리 4번이라 시간으로는 드러나지 않지만, 쿼리 수 검사는 바로 실패한다. 그래서 N+1은 테스트의 쿼리 수 검사로 잡는 것이 가장 이르고 싸다.
+Hibernate에서는 통계를 켜 두고 테스트에서 준비된 SQL 문 수를 단언한다.
+
+```java
+// hibernate.generate_statistics: true
+Statistics stats = emf.unwrap(SessionFactory.class).getStatistics();
+stats.clear();
+reportService.export();
+assertEquals(1, stats.getPrepareStatementCount());   // 루프마다 지연 로딩하면 1 + N이라 실패한다
+```
+
+통계는 SessionFactory 전체에 쌓이므로 테스트를 병렬로 돌리면 다른 테스트의 쿼리도 섞인다.
+
+데이터 3건짜리 테스트에서 N+1은 쿼리 4번이라 시간으로는 드러나지 않지만, 쿼리 수 검사는 바로 실패한다. 데이터 크기와 상관없이 실패하므로 N+1을 가장 이르고 싸게 잡는 방법이다.
 
 ## 고치는 방법은 조인과 IN 묶음이다
 
@@ -62,6 +116,32 @@ SQLAlchemy의 relationship 기본 로딩 전략은 `select`, 곧 접근할 때 �
 조인 방식은 왕복이 1번이지만 결과가 자식 행 수만큼 나오고 부모 컬럼이 그만큼 반복된다. 캠페인 1,000개에 광고 그룹이 평균 50개면 캠페인 컬럼이 5만 행에 반복돼 돌아온다. 자식 컬렉션이 둘이면 곱으로 불어나는데, 이 경우는 아래에서 따로 다룬다. Django의 `select_related()`가 외래 키와 일대일 같은 단일 값 관계에만 쓰이는 것도 이 때문이다.
 
 IN 묶음 방식은 부모 쿼리 뒤에 `WHERE campaign_id IN (...)` 쿼리를 따로 보낸다. 행이 불어나지 않고, 자식 컬렉션이 여럿이어도 컬렉션마다 쿼리 하나씩이다. SQLAlchemy `selectinload()`는 부모 키를 최대 500개씩 끊어 보내고, Django `prefetch_related()`는 관계마다 쿼리를 한 번 더 보낸 뒤 파이썬에서 붙인다. 일대다 컬렉션에는 대개 이쪽이 맞고, 다대일·일대일처럼 행마다 붙는 대상이 하나뿐인 관계는 조인이 맞다.
+
+Spring Data JPA에서는 앞의 루프를 세 가지로 고칠 수 있다.
+
+```java
+public interface CampaignRepository extends JpaRepository<Campaign, Long> {
+    @Query("select c from Campaign c left join fetch c.adGroups")
+    List<Campaign> findAllWithAdGroups();          // 조인 1번
+
+    @EntityGraph(attributePaths = "adGroups")
+    List<Campaign> findByStatus(String status);    // 조인 1번
+}
+```
+
+```yaml
+# 루프 코드는 그대로 두고 지연 로딩을 100개씩 IN으로 묶는다
+spring.jpa.properties.hibernate.default_batch_fetch_size: 100
+```
+
+| 방법 | 바꾸는 곳 | 캠페인 1,000개일 때 쿼리 수 |
+|---|---|---|
+| 그대로 지연 로딩 | 없음 | 1 + 1,000 |
+| `left join fetch` | JPQL | 1 |
+| `@EntityGraph` | 리포지토리 메서드 어노테이션 | 1 |
+| `default_batch_fetch_size: 100` | 설정 | 1 + 10 |
+
+`left join fetch`와 entity graph는 같은 SQL을 만든다. `join fetch`만 쓰면 inner join이라 광고 그룹이 없는 캠페인이 결과에서 빠진다. entity graph는 기본이 left outer join이고, `findByStatus`처럼 JPQL 없이 메서드 이름으로 만든 쿼리에도 붙는다. Hibernate 6부터는 조인으로 반복된 캠페인 객체를 알아서 하나로 합치므로 `distinct`를 붙이지 않아도 된다. `default_batch_fetch_size`는 지정하지 않으면 꺼져 있고, 그때는 `@BatchSize`를 단 엔티티와 컬렉션만 묶어서 읽는다. Spring Boot도 이 값을 넣어 주지 않는다.
 
 ## 컬렉션 두 개를 한 쿼리로 가져오면
 
@@ -113,4 +193,4 @@ Q. 언제 지연 로딩을 그대로 둬도 되나?
 
 ## English summary
 
-An N+1 problem is one query for a list and then one more query for each row in the list. Each query is fast, so the slow query log stays empty, but the round trips add up and grow with the data. ORMs hide it behind attribute access: SQLAlchemy loads relationships lazily by default, and JPA's EAGER default for many-to-one still runs extra selects after a JPQL query. It shows up in query counts, not timings, so pg_stat_statements calls or a query count assertion in tests catch it. The fix is a join for single-valued relations or an IN batch for collections, and for paged results the parent keys come first and the children are loaded by those keys. The same shape shows up in pipelines that look up a table or an API per row, and the fix is the same there too: ask once for many keys.
+An N+1 problem is one query for a list and then one more query for each row in the list. Each query is fast, so the slow query log stays empty, but the round trips add up and grow with the data. ORMs hide it behind attribute access: SQLAlchemy loads relationships lazily by default, and JPA's EAGER default for many-to-one still runs extra selects after a JPQL query. LAZY only decides when the select runs, so lazy associations accessed in a loop are the N+1 itself, and one lazy load can trigger the next one level down. It shows up in query counts, not timings, so pg_stat_statements calls or a query count assertion in tests catch it. The fix is a join for single-valued relations or an IN batch for collections, and for paged results the parent keys come first and the children are loaded by those keys. The same shape shows up in pipelines that look up a table or an API per row, and the fix is the same there too: ask once for many keys.
