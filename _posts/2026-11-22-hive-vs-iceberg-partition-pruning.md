@@ -141,7 +141,7 @@ S3 요청 요금은 종류마다 다르다. S3 Standard(us-east-1) 기준으로 
 | 파티션이 수천 개를 넘거나 파일이 많아 계획 시간이 길다 | Iceberg |
 | 파티션 컬럼이 아닌 컬럼으로 자주 거른다 | Iceberg + 그 컬럼으로 정렬 |
 | CDC upsert, 삭제, 여러 잡이 동시에 쓴다 | Iceberg. S3 위 Hive 스타일(비 ACID)은 원자적 커밋이 없다 |
-| 이력이 긴 CDC upsert 테이블인데 컴팩션이 sink 커밋을 못 따라간다 | 최근 며칠만 Iceberg에 두고 지난 이력은 매일 덤프한 Hive 일 파티션에서 읽는다(아래 묻고 답하기) |
+| 이력이 긴 CDC upsert 테이블인데 최신 변경은 바로 봐야 하고, 전체 이력을 Iceberg에 두면 컴팩션 비용이 테이블 크기를 따라간다 | 최근 며칠만 Iceberg에 두고 지난 이력은 매일 덤프한 Hive 일 파티션에서 읽는다(아래 묻고 답하기) |
 | 파티션 기준이나 스키마가 바뀔 가능성이 있다 | Iceberg |
 | 읽는 쪽이 Iceberg를 못 읽는 오래된 엔진이다 | Hive 스타일을 유지하거나 엔진부터 올린다 |
 
@@ -163,32 +163,57 @@ append 전용이면 Iceberg가 가장 편한 경우다. delete 파일이 없어 
 
 Q. CDC로 받는 큰 결제 이력 테이블도 Iceberg 하나에 전부 두면 되나?
 
-컴팩션이 sink 커밋을 따라가면 된다. Iceberg는 낙관적 동시성 제어라 sink 커밋과 컴팩션 커밋이 부딪히면 나중 쪽이 다시 시도하고, 그래도 맞지 않으면 실패한다. 컴팩션이 밀리면 그만큼 equality delete 파일이 쌓인다. 내가 맡은 CDC 테이블들은 upsert sink가 3분마다 커밋했고, S3 Tables 관리형 컴팩션이 `Internal error` 같은 오류로 반복 실패했다. 원인으로는 동시 쓰기 충돌을 의심했다. Athena CTAS로 다시 쓰는 것도 Athena 내부 오류로 실패했고, 수천만 건이 넘는 테이블은 Spark로 다시 쓰려면 클러스터를 키우고 CDC 수집을 잠시 멈추는 별도 조치가 필요하다고 봤다.
+컴팩션이 sink 커밋을 따라갈 때만 된다. Iceberg는 낙관적 동시성 제어라 sink 커밋과 컴팩션 커밋이 부딪히면 나중 쪽이 다시 시도하고, 다시 시도해도 계속 부딪히면 실패한다. 컴팩션이 밀리면 그만큼 equality delete 파일이 쌓인다. 내가 맡은 CDC 테이블들은 upsert sink가 3분마다 커밋했고, S3 Tables 관리형 컴팩션이 `Internal error` 같은 오류로 반복 실패했다. 원인으로는 동시 쓰기 충돌을 의심했다. Athena CTAS로 다시 쓰는 것도 Athena 내부 오류로 실패했고, 수천만 건이 넘는 테이블을 Spark로 다시 쓰려면 클러스터를 키우고 CDC 수집을 잠시 멈추는 별도 조치를 검토해야 했다.
 
-그래서 결제 이력은 최근 7일만 Iceberg에 남기고 그보다 오래된 행은 매일 지운다. 지난 이력은 원천 DB를 하루 한 번 떠 오는 Hive 일 파티션 테이블에서 읽는다. Iceberg 쪽은 작게 유지되고, 큰 쪽은 delete 파일 없는 Parquet이라 `dt` 프루닝이 그대로 된다. 대신 맞춰야 할 것이 생긴다.
+결제 이력 테이블은 행이 많았고, CDC 토픽이 이미 나오고 있었지만 Iceberg sink 대상에서 빠져 있었다. 그래서 원천 DB를 매일 05시에 떠 오는 Hive 일 파티션으로만 읽었다. 전날분만 적재하니 04시 59분에는 그제까지만 보여 최대 약 29시간 늦었다. 덤프는 그 순간의 스냅샷이라, 나중에 들어온 취소로 원거래의 취소 여부 컬럼이 바뀌어도 반영되지 않았다. 취소는 원거래 뒤 p99 3일, p99.9 24일, 길게는 519일 뒤에도 들어왔다.
+
+이 테이블은 파티션 없는 upsert라 equality delete가 모든 데이터 파일에 걸리고, 컴팩션, dedup, 조회 스캔 비용이 Iceberg에 둔 행 수를 따라간다. 이 조건에서 고를 수 있는 구성은 넷이었다.
+
+| 구성 | 최신 변경이 보이기까지 | 비용과 운영 부담 | 판단 |
+|---|---|---|---|
+| Hive 일 덤프만 | 최대 약 29시간, 덤프 뒤 취소는 안 보임 | 가장 적다 | 기각(그때 구성) |
+| Iceberg에 전체 이력 | 약 3분 | 매일 dedup과 컴팩션이 전체 이력을 다시 쓴다. sink에서 뺀 이유와 같다 | 기각 |
+| Iceberg 전체 이력 + 날짜 파티션 | 약 3분 | 지난 이력을 다시 쓰고 과거분을 다시 채워야 한다. 최근 파티션 컴팩션은 여전히 sink 커밋과 겹친다 | 기각 |
+| Iceberg 최근 7일 + Hive 이력 | 약 3분 | Iceberg에 최근분만 둬 작다. 병합 쿼리와 취소 재덤프가 생긴다 | 채택 |
+
+셋째 구성은 시간 컬럼이 Debezium이 보낸 epoch 밀리초 BIGINT라 `day` 대신 `truncate(86400000, ...)`로 하루를 잘라야 한다([Iceberg 테이블 포맷 글](/posts/iceberg-table-format/)). 한 테이블로 가려면 sink는 변경 로그를 append로만 쓰고 주기적인 MERGE가 본 테이블을 갱신하는 식으로 쓰는 쪽을 바꿔야 한다.
+
+넷째 구성은 최신 변경이 필요한 구간만 Iceberg에 두고, 바뀔 일이 드문 지난 이력은 delete 파일 없는 Hive에 둔다. CDC를 다시 Iceberg로 받되 최근 며칠치만 남기고, 그보다 오래된 행은 매일 새벽 도는 dedup 잡이 지우게 했다. 남은 질문은 며칠을 둘지였다. dedup이 매일 테이블 전체를 다시 쓰고 컴팩션도 크기를 따라가니 보존 기간이 곧 비용이었다.
+
+| 보존 | 크기 | 월 비용(추정) | 판단 |
+|---|---|---|---|
+| 3일 | 약 36 MB | 약 $0.2 | 최근 Hive 덤프가 하루만 빠져도 그날이 빈다 |
+| 7일 | 약 85 MB | 약 $0.4 | 채택 |
+| 90일 | 약 1.1 GB | 약 $4.5 | 비용은 10배인데 더 잡히는 취소는 0.22% 안쪽 |
+| 13개월 | 약 4.7 GB | 약 $18 | 과거분을 다시 채우는 작업과 파티션 설계가 더 필요하다 |
+
+비용은 컴팩션이 하루 한 번 테이블 전체를 다시 쓰고(S3 Tables 컴팩션 $0.05/GB) 대시보드 쿼리가 월 1,500번이라고 놓은 근사치다. 쿼리는 오늘을 포함한 최근 7일을 Iceberg에서 읽으니, 그 사이 Hive 덤프가 연휴에 실패하거나 늦어도 빈 날이 없다. 취소의 99.78%가 원거래 7일 안에 들어온다(3일이면 99.4%). Kafka 토픽 보존 기간(7~14일) 안이라 테이블이 깨져도 offset만 되돌리면 다시 채울 수 있다.
+
+대신 두 곳으로 나누면 맞춰야 할 것이 생긴다.
 
 | 나눠서 생기는 일 | 맞추는 방법 |
 |---|---|
-| 덤프한 뒤 바뀐 행(결제 취소) | 바뀐 원거래 날짜의 파티션을 다시 덤프한다 |
+| 덤프한 뒤 바뀐 행(7일 밖 결제 취소) | 매일 아침 바뀐 원거래 날짜의 파티션을 다시 덤프한다 |
 | 두 곳에 같은 결제가 있음 | `UNION ALL`로 합치고 키마다 Iceberg 행을 먼저 고른다 |
 | 보존 일수와 쿼리 경계 | 지우는 잡의 보존 일수와 쿼리가 Hive로 넘어가는 경계를 같은 값으로 맞춘다 |
+| sink가 보존 기간보다 오래 멈춤 | 지우는 잡이 테이블을 통째로 비우지 않게 DELETE 없이 실패한다 |
+
+경계일(오늘에서 6일 전) 전날까지는 Hive만, 경계일부터는 Iceberg만 읽게 자르면 두 쪽이 겹치지 않는다. 경계를 넘겨 겹쳐 읽는 쿼리라면 아래처럼 `ROW_NUMBER`로 Iceberg 행을 고른다.
 
 ```sql
 SELECT * FROM (
   SELECT t.*, ROW_NUMBER() OVER (PARTITION BY payment_id ORDER BY src, version DESC) AS rn
   FROM (
-    SELECT payment_id, is_refund, CAST(amount AS decimal(18,2)) AS amount, 0 AS src, cdc_offset AS version
+    SELECT payment_id, refunded, CAST(amount AS decimal(18,2)) AS amount, 0 AS src, cdc_offset AS version
     FROM iceberg.db.payments
     UNION ALL
-    SELECT payment_id, is_refund, CAST(amount AS decimal(18,2)), 1, 0
+    SELECT payment_id, refunded, CAST(amount AS decimal(18,2)), 1, 0
     FROM hive.db.payments WHERE dt >= '2026-11-01'
   ) t
 ) WHERE rn = 1;
 ```
 
-`UNION`(DISTINCT)으로는 안 된다. DISTINCT는 모든 컬럼이 같은 행만 하나로 합치는데, 덤프 뒤 취소된 결제는 두 출처의 `is_refund`가 달라 두 행이 그대로 남는다. 키마다 한 행을 고르려면 `ROW_NUMBER`가 있어야 한다.
-
-Iceberg 전체 이력에 날짜 파티션을 거는 길도 있다. 시간 컬럼이 Debezium이 보낸 epoch 밀리초 BIGINT라 `day`는 못 쓰고 `truncate(86400000, ...)`로 하루를 자른다([Iceberg 테이블 포맷 글](/posts/iceberg-table-format/)). 스펙을 바꿔도 새 파일에만 적용되니 지난 이력까지 나누려면 파일을 다시 써야 한다. 그래도 sink가 몇 분마다 최근 파티션에 커밋하는 한 그 파티션의 컴팩션은 sink 커밋과 겹칠 수 있다. 한 테이블로 돌아가려면 쓰는 쪽을 바꿔야 한다. sink는 변경 로그를 append로만 쓰고, 주기적인 MERGE가 본 테이블을 갱신하는 식이다.
+`UNION`(DISTINCT)으로는 안 된다. DISTINCT는 모든 컬럼이 같은 행만 하나로 합치는데, 덤프 뒤 취소된 결제는 두 출처의 `refunded`가 달라 두 행이 그대로 남는다. 키마다 한 행을 고르려면 `ROW_NUMBER`가 있어야 한다.
 
 Q. Hive 테이블에서 `event_ts` 조건만 주면 아무 이득이 없나?
 
@@ -207,4 +232,4 @@ Q. Hive 테이블에서 `event_ts` 조건만 주면 아무 이득이 없나?
 
 ## English summary
 
-Both Hive-style Parquet tables and Iceberg tables prune partitions, but they pick files from different sources. A Hive table keeps the partition value in the directory name, so the engine asks the metastore for matching partitions, lists each partition's S3 prefix, and opens every file footer; a filter on the raw timestamp alone prunes nothing unless the query also filters the `dt` column. Iceberg writes each file's partition value and column bounds into manifests at commit time, so planning reads the manifest list and manifests, skips whole manifests and files before opening them, and never lists directories. Hidden partitioning turns a filter on `event_ts` into a filter on `days(event_ts)`, and partition specs can change without rewriting old files. Iceberg's file skipping still depends on clustered data, column stats limits, and compact manifests. Iceberg wins on read requests, planning time and consistency, and pays for it with metadata maintenance; an append-only daily table with a fixed `dt` filter can stay Hive style with partition projection. For a large CDC upsert table where managed compaction kept failing while the sink committed every three minutes, I keep only the last seven days in Iceberg and read older history from a daily Hive dump. Queries combine the two with UNION ALL and use ROW_NUMBER to keep one row per payment, preferring the Iceberg row. UNION DISTINCT does not work here, because it only collapses rows that match in every column, and a refund after the dump changes the row.
+Both Hive-style Parquet tables and Iceberg tables prune partitions, but they pick files from different sources. A Hive table keeps the partition value in the directory name, so the engine asks the metastore for matching partitions, lists each partition's S3 prefix, and opens every file footer; a filter on the raw timestamp alone prunes nothing unless the query also filters the `dt` column. Iceberg writes each file's partition value and column bounds into manifests at commit time, so planning reads the manifest list and manifests, skips whole manifests and files before opening them, and never lists directories. Hidden partitioning turns a filter on `event_ts` into a filter on `days(event_ts)`, and partition specs can change without rewriting old files. Iceberg's file skipping still depends on clustered data, column stats limits, and compact manifests. Iceberg wins on read requests, planning time and consistency, and pays for it with metadata maintenance; an append-only daily table with a fixed `dt` filter can stay Hive style with partition projection. Managed compaction kept failing on my CDC upsert tables, and the large payment table had been left out of the CDC sink. Reading it only from a daily Hive dump made it up to 29 hours late and missed later refunds. The table has no partitions, so compaction and dedup cost grows with every row kept in Iceberg. I put it back into Iceberg but keep only the last seven days, and read older history from the Hive dump. Queries combine the two with UNION ALL and keep one row per payment with ROW_NUMBER. UNION DISTINCT is not enough, because a refund after the dump makes the two rows differ. Seven days is only about 85 MB. It catches 99.78% of refunds, and a dump that fails over a holiday leaves no gap. It also stays inside Kafka retention, so I can rebuild the table by resetting offsets.
