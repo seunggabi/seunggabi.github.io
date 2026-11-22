@@ -220,10 +220,10 @@ compress_html:
 # These values are public identifiers, not secrets; access is enforced by firestore.rules.
 # Leave apiKey empty to keep read marks in localStorage only.
 firebase:
-  apiKey: ""
-  authDomain: "" # <project-id>.firebaseapp.com
-  projectId: ""
-  appId: ""
+  apiKey: "AIzaSyB-8xwu6wpQ4uQucB87YDCJ--fgrvNcDPc"
+  authDomain: "seunggabi-blog.firebaseapp.com"
+  projectId: "seunggabi-blog"
+  appId: "1:204950096689:web:1018200eda9f7c3a323e10"
 
 exclude:
   - firebase.json
