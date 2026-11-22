@@ -3,6 +3,41 @@
   .is-read { opacity: .55; }
   .is-read .card-title::after { content: " · 읽음"; font-size: .7em; font-weight: 400; }
   .read-toggle { margin: .75rem 0; }
+  /* Shared controls: pill buttons (read toggle, sign-in) and switches (unread filter) use one look built from the theme variables */
+  .ux-pill {
+    display: inline-flex; align-items: center; gap: .45rem; padding: .38rem .9rem;
+    border-radius: 999px; border: 1px solid var(--btn-border-color, rgba(128, 128, 128, .35));
+    background: var(--card-bg, transparent); color: var(--text-muted-color, #6c757d);
+    font-size: .82rem; line-height: 1.2; cursor: pointer;
+    transition: background-color .2s, color .2s, border-color .2s;
+  }
+  .ux-pill:hover { color: var(--link-color, #2a408e); border-color: var(--link-color, #2a408e); }
+  .ux-pill:focus-visible { outline: 2px solid var(--link-color, #2a408e); outline-offset: 2px; }
+  .ux-pill i { font-size: .85em; }
+  .ux-pill.is-on {
+    color: var(--link-color, #2a408e);
+    background: color-mix(in srgb, var(--link-color, #2a408e) 14%, transparent);
+    border-color: color-mix(in srgb, var(--link-color, #2a408e) 45%, transparent);
+  }
+  .ux-switch { position: relative; display: inline-flex; align-items: center; gap: .6rem; margin: .25rem 0 1rem; font-size: .88rem; cursor: pointer; user-select: none; }
+  .ux-switch input { position: absolute; opacity: 0; width: 0; height: 0; }
+  .ux-switch .ux-track {
+    position: relative; flex: none; width: 2.3rem; height: 1.3rem; border-radius: 999px;
+    background: var(--btn-border-color, rgba(128, 128, 128, .4)); transition: background-color .2s;
+  }
+  .ux-switch .ux-track::after {
+    content: ""; position: absolute; top: .15rem; left: .15rem; width: 1rem; height: 1rem;
+    border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, .35); transition: transform .2s;
+  }
+  .ux-switch input:checked + .ux-track { background: var(--link-color, #2a408e); }
+  .ux-switch input:checked + .ux-track::after { transform: translateX(1rem); }
+  .ux-switch input:focus-visible + .ux-track { outline: 2px solid var(--link-color, #2a408e); outline-offset: 2px; }
+  .ux-switch .ux-count {
+    padding: .05rem .55rem; border-radius: 999px; font-size: .72rem; color: var(--text-muted-color, #6c757d);
+    background: color-mix(in srgb, var(--text-muted-color, #6c757d) 14%, transparent);
+  }
+  .sync-box { opacity: 1; padding-top: .9rem; }
+  .sync-hint { margin-top: .45rem; font-size: .72rem; line-height: 1.4; color: var(--text-muted-color, #6c757d); word-break: break-all; }
   /* Sidebar section labels: 커리어 (resume, portfolio) and 글 찾기 (categories, tags, archives) */
   #sidebar li.nav-item:has(> a[href$="/resume/"])::before,
   #sidebar li.nav-item:has(> a[href$="/categories/"])::before {
@@ -109,11 +144,24 @@
 {% endif %}
 <template id="sidebar-extra">
   <p class="sidebar-intro">Data Engineer<br>Batch · Streaming · CDC · Lakehouse<br>Spark · Airflow · Kafka · Flink · EMR</p>
-  <p class="sidebar-intro pt-2"><button type="button" id="auth-btn" class="btn btn-sm btn-outline-secondary" hidden></button></p>
+  <div class="sidebar-intro sync-box"><button type="button" id="auth-btn" class="ux-pill" hidden></button><div id="sync-hint" class="sync-hint" hidden></div></div>
 </template>
+{%- assign tag_pairs = "" | split: "" -%}
+{%- for t in site.tags -%}
+  {%- assign tag_count = t[1].size | plus: 1000 -%}
+  {%- capture tag_pair -%}{{ tag_count }}|{{ t[0] | downcase }}{%- endcapture -%}
+  {%- assign tag_pairs = tag_pairs | push: tag_pair -%}
+{%- endfor -%}
+{%- assign tag_pairs = tag_pairs | sort | reverse -%}
+{%- assign tag_names = "" | split: "" -%}
+{%- for tag_pair in tag_pairs -%}
+  {%- assign tag_parts = tag_pair | split: "|" -%}
+  {%- assign tag_names = tag_names | push: tag_parts[1] -%}
+{%- endfor -%}
 <script>
   (function () {
     var KEY = 'read-marks';
+    var TAG_ORDER = {{ tag_names | jsonify }};
     var FB = {{ site.firebase | jsonify }};
     var seen;
     try { seen = new Set(JSON.parse(localStorage.getItem(KEY) || '[]')); } catch (e) { return; }
@@ -130,18 +178,22 @@
       if (sync) sync.set(path, on);
     }
     document.addEventListener('DOMContentLoaded', function () {
-      /* Category hues follow the top-level categories in tech-map.md; tags hash into a fixed hue set.
+      /* Category hues follow the top-level categories in tech-map.md; the twelve most-used tags get evenly spaced hues (neighbours in popularity sit far apart on the wheel) and the rest follow the golden angle.
          No line comments in this file: the theme compresses HTML onto one line. */
       var CAT_HUE = {
         'Ingestion & CDC': 25, 'Streaming': 205, 'Batch & Query': 265, 'Lakehouse & Storage': 165,
         'Orchestration': 42, 'Transformation & Modeling': 330, 'BI & Serving': 5, 'Data Quality': 130,
         'Platform & Infra': 225, 'AI & Tooling': 290, 'System Design': 185, 'Career': 95
       };
-      var TAG_HUES = [5, 25, 42, 95, 130, 165, 185, 205, 225, 265, 290, 330];
+      var TOP_HUES = [20, 170, 320, 110, 260, 50, 200, 350, 140, 290, 80, 230];
       function tagHue(name) {
-        var h = 0;
-        for (var i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
-        return TAG_HUES[h % TAG_HUES.length];
+        var idx = TAG_ORDER.indexOf(name);
+        if (idx < 0) {
+          idx = TOP_HUES.length;
+          for (var i = 0; i < name.length; i++) idx = (idx * 31 + name.charCodeAt(i)) >>> 0;
+        }
+        if (idx < TOP_HUES.length) return TOP_HUES[idx];
+        return Math.round((idx * 137.508 + 20) % 360);
       }
       function paint(el, hue) { el.classList.add('chip'); el.style.setProperty('--h', hue); }
       document.querySelectorAll('a.post-tag').forEach(function (a) { paint(a, tagHue(a.textContent.trim().toLowerCase())); });
@@ -215,8 +267,9 @@
         var unreadWrap = document.getElementById('home-all-posts').content.cloneNode(true).firstElementChild;
         unreadWrap.hidden = true;
         var homeSw = document.createElement('label');
-        homeSw.className = 'form-check form-switch mb-3';
-        homeSw.innerHTML = '<input class="form-check-input" type="checkbox" role="switch"> <span class="form-check-label"></span>';
+        homeSw.className = 'ux-switch';
+        homeSw.title = '전체 페이지에서 안 읽은 글만 모아 봅니다';
+        homeSw.innerHTML = '<input type="checkbox" role="switch"><span class="ux-track"></span><span>안 읽은 글만 보기</span><span class="ux-count"></span>';
         var homeBox = homeSw.querySelector('input');
         homeList.before(homeSw);
         homeList.after(unreadWrap);
@@ -227,7 +280,7 @@
             li.style.display = read ? 'none' : '';
             if (!read) unread++;
           });
-          homeSw.querySelector('span').textContent = '안 읽은 글만 보기 (' + unread + '편, 전체 페이지에서)';
+          homeSw.querySelector('.ux-count').textContent = unread + '편';
           unreadWrap.hidden = !homeBox.checked;
           homeList.style.display = homeBox.checked ? 'none' : '';
           if (pager) pager.style.display = homeBox.checked ? 'none' : '';
@@ -253,8 +306,8 @@
       var onlyUnread = new URLSearchParams(location.search).has('unread');
       try { if (!onlyUnread) onlyUnread = localStorage.getItem(FILTER_KEY) === '1'; } catch (e) {}
       var sw = document.createElement('label');
-      sw.className = 'form-check form-switch my-3';
-      sw.innerHTML = '<input class="form-check-input" type="checkbox" role="switch"> <span class="form-check-label"></span>';
+      sw.className = 'ux-switch my-3';
+      sw.innerHTML = '<input type="checkbox" role="switch"><span class="ux-track"></span><span>안 읽은 글만 보기</span><span class="ux-count"></span>';
       var box = sw.querySelector('input');
       list.prepend(sw);
       function applyFilter() {
@@ -264,7 +317,7 @@
           if (read) readCount++;
           li.style.display = box.checked && read ? 'none' : '';
         });
-        sw.querySelector('span').textContent = '안 읽은 글만 보기 (읽은 글 ' + readCount + '편 숨김)';
+        sw.querySelector('.ux-count').textContent = '읽은 글 ' + readCount + '편 숨김';
         list.querySelectorAll('ul').forEach(function (ul) {
           var visible = Array.from(ul.children).some(function (li) { return li.style.display !== 'none'; });
           ul.style.display = visible ? '' : 'none';
@@ -286,8 +339,8 @@
       function render() {
         var on = seen.has(here);
         buttons.forEach(function (b) {
-          b.textContent = on ? '읽음 표시됨 (취소)' : '읽음으로 표시';
-          b.className = 'read-toggle btn btn-sm ' + (on ? 'btn-secondary' : 'btn-outline-secondary');
+          b.innerHTML = on ? '<i class="fa-solid fa-circle-check"></i><span>읽음 표시됨 (취소)</span>' : '<i class="fa-regular fa-circle-check"></i><span>읽음으로 표시</span>';
+          b.className = 'read-toggle ux-pill' + (on ? ' is-on' : '');
           b.setAttribute('aria-pressed', on);
         });
       }
@@ -312,8 +365,13 @@
         var loading = null;
         authBtn.hidden = false;
         function setBtn(user) {
-          authBtn.textContent = user ? 'Google 로그아웃 (' + (user.email || '') + ')' : 'Google 로그인으로 읽음 동기화';
-          authBtn.className = 'btn btn-sm ' + (user ? 'btn-secondary' : 'btn-outline-secondary');
+          var hint = document.getElementById('sync-hint');
+          authBtn.innerHTML = user ? '<i class="fa-solid fa-right-from-bracket"></i><span>로그아웃</span>' : '<i class="fa-brands fa-google"></i><span>Google로 로그인</span>';
+          authBtn.className = 'ux-pill' + (user ? ' is-on' : '');
+          if (hint) {
+            hint.textContent = user ? (user.email || '') + ' 계정으로 동기화 중' : '읽음 표시를 모든 기기에서 동기화합니다';
+            hint.hidden = false;
+          }
         }
         function setFlag(on) {
           try { localStorage.setItem(FLAG, on ? '1' : '0'); } catch (e) {}
