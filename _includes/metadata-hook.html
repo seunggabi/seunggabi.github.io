@@ -36,6 +36,7 @@
     padding: .05rem .55rem; border-radius: 999px; font-size: .72rem; color: var(--text-muted-color, #6c757d);
     background: color-mix(in srgb, var(--text-muted-color, #6c757d) 14%, transparent);
   }
+  .post-stats { margin-top: .5rem; font-size: .8rem; color: var(--text-muted-color, #6c757d); }
   .sync-box { opacity: 1; padding-top: .9rem; }
   .sync-hint { margin-top: .45rem; font-size: .72rem; line-height: 1.4; color: var(--text-muted-color, #6c757d); word-break: break-all; }
   /* Sidebar section labels: 커리어 (resume, portfolio) and 글 찾기 (categories, tags, archives) */
@@ -169,6 +170,17 @@
     var sync = null;
     function save() {
       try { localStorage.setItem(KEY, JSON.stringify(Array.from(seen))); } catch (e) {}
+    }
+    function statId(path) {
+      var h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+      for (var i = 0; i < path.length; i++) {
+        var c = path.charCodeAt(i);
+        h1 = Math.imul(h1 ^ c, 2654435761);
+        h2 = Math.imul(h2 ^ c, 1597334677);
+      }
+      h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+      h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+      return 'p' + (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
     }
     function changed() { listeners.forEach(function (fn) { fn(); }); }
     function setRead(path, on) {
@@ -333,6 +345,7 @@
       listeners.push(applyFilter);
       applyFilter();
       {% endif %}
+      var statsEl = null;
       {% if page.layout == 'post' %}
       var here = location.pathname;
       var buttons = [];
@@ -355,6 +368,10 @@
       });
       listeners.push(render);
       render();
+      statsEl = document.createElement('div');
+      statsEl.className = 'post-stats';
+      statsEl.hidden = true;
+      if (buttons[0]) buttons[0].after(statsEl);
       {% endif %}
       var authBtn = document.getElementById('auth-btn');
       if (FB && FB.apiKey && authBtn) {
@@ -406,6 +423,7 @@
           sync = {
             set: function (path, on) {
               f.F.setDoc(ref, { reads: on ? f.F.arrayUnion(path) : f.F.arrayRemove(path) }, { merge: true }).catch(function () {});
+              f.F.setDoc(f.F.doc(f.db, 'stats', statId(path)), { reads: f.F.increment(on ? 1 : -1) }, { merge: true }).catch(function () {});
             },
             theme: function (mode) {
               if (mode === remoteTheme) return;
@@ -420,6 +438,9 @@
               seen.forEach(function (p) { if (!next.has(p)) { next.add(p); extra.push(p); } });
               if (extra.length) {
                 f.F.setDoc(ref, { reads: f.F.arrayUnion.apply(null, extra) }, { merge: true }).catch(function () {});
+                extra.forEach(function (p) {
+                  f.F.setDoc(f.F.doc(f.db, 'stats', statId(p)), { reads: f.F.increment(1) }, { merge: true }).catch(function () {});
+                });
               }
             }
             var rt = snap.exists() ? snap.data().theme : null;
@@ -461,6 +482,27 @@
             return f.A.signInWithPopup(f.auth, new f.A.GoogleAuthProvider());
           }).then(function () { setFlag(true); }).catch(function () { state.merge = false; });
         };
+        if (statsEl) {
+          var showStats = function () {
+            load().then(function (f) {
+              var sref = f.F.doc(f.db, 'stats', statId(here));
+              f.F.onSnapshot(sref, function (snap) {
+                var d = snap.exists() ? snap.data() : {};
+                statsEl.textContent = '조회 ' + (d.views || 0) + ' · 읽음 ' + (d.reads || 0) + '명';
+                statsEl.hidden = false;
+              }, function () {});
+              var vk = 'viewed-' + statId(here);
+              var today = new Date().toISOString().slice(0, 10);
+              var last = null;
+              try { last = localStorage.getItem(vk); } catch (e) {}
+              if (last !== today) {
+                try { localStorage.setItem(vk, today); } catch (e) {}
+                f.F.setDoc(sref, { views: f.F.increment(1) }, { merge: true }).catch(function () {});
+              }
+            }).catch(function () { loading = null; });
+          };
+          if (window.requestIdleCallback) { requestIdleCallback(showStats, { timeout: 3000 }); } else { setTimeout(showStats, 1500); }
+        }
         var flagged = false;
         try { flagged = localStorage.getItem(FLAG) === '1'; } catch (e) {}
         if (flagged) ensure().catch(function () { loading = null; });
