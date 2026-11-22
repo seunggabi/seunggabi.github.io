@@ -155,7 +155,7 @@
       }
       var nudge = document.getElementById('music-nudge');
       function openMusic() {
-        var w = window.open('', 'blog-music', 'width=380,height=300');
+        var w = window.open('', 'blog-music', 'width=420,height=320');
         if (!w) { window.open('{{ "/music/" | relative_url }}', '_blank'); return; }
         try { if (w.location.href === 'about:blank') w.location.href = '{{ "/music/" | relative_url }}'; } catch (e) {}
         w.focus();
