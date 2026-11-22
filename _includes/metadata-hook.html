@@ -1,7 +1,7 @@
 <!-- Read marks: the reader marks a post as read with a button on the post page; marked posts are dimmed in every post list. Stored in localStorage; when site.firebase is configured, a Google sign-in syncs them across browsers through Firestore (users/{uid}.reads). -->
 <link rel="alternate" type="application/atom+xml" title="{{ site.title }}" href="{{ '/feed.xml' | relative_url }}">
 <style>
-  .is-read { opacity: .55; }
+  .is-read { opacity: .75; }
   .is-read .card-title::after { content: " · 읽음"; font-size: .7em; font-weight: 400; }
   .read-toggle { margin: .75rem 0; }
   /* Shared controls: pill buttons (read toggle, sign-in) and switches (unread filter) use one look built from the theme variables */
@@ -64,11 +64,11 @@
     border-top: 1px solid var(--sidebar-border-color, rgba(128, 128, 128, .25));
     font-size: .7rem;
     letter-spacing: .08em;
-    opacity: .6;
+    opacity: .75;
   }
   #sidebar li.nav-item:has(> a[href$="/resume/"])::before { content: "커리어"; }
   #sidebar li.nav-item:has(> a[href$="/categories/"])::before { content: "글 찾기"; }
-  .sidebar-intro { align-self: stretch; margin: 0; padding: 1.25rem 1rem 0 2.5rem; font-size: .8rem; line-height: 1.6; opacity: .7; }
+  .sidebar-intro { align-self: stretch; margin: 0; padding: 1.25rem 1rem 0 2.5rem; font-size: .8rem; line-height: 1.6; opacity: .8; }
   /* Sidebar bottom: the mode toggle sits on its own row so the five icons (github, email, rss, linkedin, music) fit on one line */
   #sidebar .sidebar-bottom.d-flex > .btn-group { flex: 0 0 auto; margin-right: 100%; }
   #sidebar .sidebar-bottom .icon-border { display: none; }
@@ -86,6 +86,7 @@
     background-color: var(--sidebar-btn-bg, #fff); color: var(--sidebar-btn-color, #8e8e8e);
     box-shadow: var(--sidebar-border-color, #efefef) 0 0 0 1px, 0 2px 8px rgba(0,0,0,.12); cursor: pointer;
   }
+  #music-btn:focus-visible { outline: 2px solid var(--sidebar-active-color, #1d1d1d); outline-offset: 2px; }
   #music-btn:hover { background-color: var(--sidebar-hover-bg, #f4f4f4); color: var(--sidebar-active-color, #1d1d1d); }
   #music-nudge {
     position: fixed; left: 1.25rem; bottom: 4.6rem; z-index: 1040; max-width: 15rem;
@@ -142,7 +143,7 @@
 </template>
 <template id="music-extra">
   <button type="button" id="music-btn" aria-label="배경음악 창 열기" title="배경음악: Hans Zimmer - Time"><i class="fas fa-music"></i></button>
-  <div id="music-nudge" role="dialog" aria-label="배경음악 안내" hidden>
+  <div id="music-nudge" role="region" aria-label="배경음악 안내" hidden>
     읽는 동안 Hans Zimmer의 Time을 틀어 둘까요? 작은 창에서 재생돼서 글을 옮겨도 이어집니다.
     <div class="actions">
       <button type="button" class="btn btn-sm btn-outline-secondary" data-music="close">괜찮아요</button>
