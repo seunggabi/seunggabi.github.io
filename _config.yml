@@ -216,7 +216,19 @@ compress_html:
   ignore:
     envs: [development]
 
+# Firebase web config for syncing read marks across browsers (Google sign-in + Firestore).
+# These values are public identifiers, not secrets; access is enforced by firestore.rules.
+# Leave apiKey empty to keep read marks in localStorage only.
+firebase:
+  apiKey: ""
+  authDomain: "" # <project-id>.firebaseapp.com
+  projectId: ""
+  appId: ""
+
 exclude:
+  - firebase.json
+  - firestore.rules
+  - .firebaserc
   - "*.gem"
   - "*.gemspec"
   - docs

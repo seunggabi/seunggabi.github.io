@@ -1,4 +1,4 @@
-<!-- Read marks: the reader marks a post as read with a button on the post page; marked posts are dimmed in every post list. Stored in localStorage only. -->
+<!-- Read marks: the reader marks a post as read with a button on the post page; marked posts are dimmed in every post list. Stored in localStorage; when site.firebase is configured, a Google sign-in syncs them across browsers through Firestore (users/{uid}.reads). -->
 <style>
   .is-read { opacity: .55; }
   .is-read .card-title::after { content: " · 읽음"; font-size: .7em; font-weight: 400; }
@@ -105,14 +105,25 @@
 {% endif %}
 <template id="sidebar-extra">
   <p class="sidebar-intro">Data Engineer<br>Batch · Streaming · CDC · Lakehouse<br>Spark · Airflow · Kafka · Flink · EMR</p>
+  <p class="sidebar-intro pt-2"><button type="button" id="auth-btn" class="btn btn-sm btn-outline-secondary" hidden></button></p>
 </template>
 <script>
   (function () {
     var KEY = 'read-marks';
+    var FB = {{ site.firebase | jsonify }};
     var seen;
     try { seen = new Set(JSON.parse(localStorage.getItem(KEY) || '[]')); } catch (e) { return; }
+    var listeners = [];
+    var sync = null;
     function save() {
       try { localStorage.setItem(KEY, JSON.stringify(Array.from(seen))); } catch (e) {}
+    }
+    function changed() { listeners.forEach(function (fn) { fn(); }); }
+    function setRead(path, on) {
+      if (on) { seen.add(path); } else { seen.delete(path); }
+      save();
+      changed();
+      if (sync) sync.set(path, on);
     }
     document.addEventListener('DOMContentLoaded', function () {
       /* Category hues follow the top-level categories in tech-map.md; tags hash into a fixed hue set.
@@ -175,37 +186,44 @@
       var nav = document.querySelector('#sidebar nav');
       if (nav) nav.after(document.getElementById('sidebar-extra').content.cloneNode(true));
       var access = document.querySelector('#panel-wrapper .access');
-      if (access) {
-        access.prepend(document.getElementById('panel-extra').content.cloneNode(true));
+      if (access) access.prepend(document.getElementById('panel-extra').content.cloneNode(true));
+      function updateProgress() {
+        if (!access) return;
         var total = {{ site.posts.size }};
         var n = Math.min(seen.size, total);
         access.querySelector('.read-progress-text').textContent = n + ' / ' + total + '편';
         access.querySelector('.progress-bar').style.width = (100 * n / total) + '%';
       }
-      document.querySelectorAll('a[href*="/posts/"]').forEach(function (a) {
-        var path = new URL(a.href, location.href).pathname;
-        if (path !== location.pathname && seen.has(path)) {
-          (a.closest('article.card') || a).classList.add('is-read');
-        }
-      });
+      function updateDim() {
+        document.querySelectorAll('a[href*="/posts/"]').forEach(function (a) {
+          var path = new URL(a.href, location.href).pathname;
+          (a.closest('article.card') || a).classList.toggle('is-read', path !== location.pathname && seen.has(path));
+        });
+      }
+      listeners.push(updateProgress, updateDim);
+      updateProgress();
+      updateDim();
       {% if page.layout == 'home' %}
       var homeList = document.getElementById('post-list');
       if (homeList) {
         var HOME_KEY = 'read-filter-unread';
         var pager = document.querySelector('nav[aria-label="Page Navigation"]') || document.querySelector('.pagination');
         var unreadWrap = document.getElementById('home-all-posts').content.cloneNode(true).firstElementChild;
-        Array.from(unreadWrap.children).forEach(function (li) {
-          if (seen.has(new URL(li.querySelector('a').href, location.href).pathname)) li.remove();
-        });
         unreadWrap.hidden = true;
         var homeSw = document.createElement('label');
         homeSw.className = 'form-check form-switch mb-3';
         homeSw.innerHTML = '<input class="form-check-input" type="checkbox" role="switch"> <span class="form-check-label"></span>';
-        homeSw.querySelector('span').textContent = '안 읽은 글만 보기 (' + unreadWrap.children.length + '편, 전체 페이지에서)';
         var homeBox = homeSw.querySelector('input');
         homeList.before(homeSw);
         homeList.after(unreadWrap);
         function applyHome() {
+          var unread = 0;
+          Array.from(unreadWrap.children).forEach(function (li) {
+            var read = seen.has(new URL(li.querySelector('a').href, location.href).pathname);
+            li.style.display = read ? 'none' : '';
+            if (!read) unread++;
+          });
+          homeSw.querySelector('span').textContent = '안 읽은 글만 보기 (' + unread + '편, 전체 페이지에서)';
           unreadWrap.hidden = !homeBox.checked;
           homeList.style.display = homeBox.checked ? 'none' : '';
           if (pager) pager.style.display = homeBox.checked ? 'none' : '';
@@ -215,6 +233,7 @@
           try { localStorage.setItem(HOME_KEY, homeBox.checked ? '1' : '0'); } catch (e) {}
           applyHome();
         };
+        listeners.push(applyHome);
         applyHome();
       }
       {% endif %}
@@ -222,19 +241,26 @@
       var FILTER_KEY = 'read-filter-unread';
       var list = document.querySelector('main .content') || document.querySelector('main');
       var items = Array.from(list.querySelectorAll('li')).filter(function (li) {
-        var a = li.querySelector('a[href*="/posts/"]');
-        return a && seen.has(new URL(a.href, location.href).pathname);
+        return li.querySelector('a[href*="/posts/"]');
       });
+      function isRead(li) {
+        return seen.has(new URL(li.querySelector('a[href*="/posts/"]').href, location.href).pathname);
+      }
       var onlyUnread = new URLSearchParams(location.search).has('unread');
       try { if (!onlyUnread) onlyUnread = localStorage.getItem(FILTER_KEY) === '1'; } catch (e) {}
       var sw = document.createElement('label');
       sw.className = 'form-check form-switch my-3';
       sw.innerHTML = '<input class="form-check-input" type="checkbox" role="switch"> <span class="form-check-label"></span>';
       var box = sw.querySelector('input');
-      sw.querySelector('span').textContent = '안 읽은 글만 보기 (읽은 글 ' + items.length + '편 숨김)';
       list.prepend(sw);
       function applyFilter() {
-        items.forEach(function (li) { li.style.display = box.checked ? 'none' : ''; });
+        var readCount = 0;
+        items.forEach(function (li) {
+          var read = isRead(li);
+          if (read) readCount++;
+          li.style.display = box.checked && read ? 'none' : '';
+        });
+        sw.querySelector('span').textContent = '안 읽은 글만 보기 (읽은 글 ' + readCount + '편 숨김)';
         list.querySelectorAll('ul').forEach(function (ul) {
           var visible = Array.from(ul.children).some(function (li) { return li.style.display !== 'none'; });
           ul.style.display = visible ? '' : 'none';
@@ -247,6 +273,7 @@
         try { localStorage.setItem(FILTER_KEY, box.checked ? '1' : '0'); } catch (e) {}
         applyFilter();
       };
+      listeners.push(applyFilter);
       applyFilter();
       {% endif %}
       {% if page.layout == 'post' %}
@@ -260,11 +287,7 @@
           b.setAttribute('aria-pressed', on);
         });
       }
-      function toggle() {
-        if (seen.has(here)) { seen.delete(here); } else { seen.add(here); }
-        save();
-        render();
-      }
+      function toggle() { setRead(here, !seen.has(here)); }
       [document.querySelector('article header'), document.querySelector('article .content')].forEach(function (anchor, i) {
         if (!anchor) return;
         var b = document.createElement('button');
@@ -273,8 +296,88 @@
         if (i === 0) { anchor.appendChild(b); } else { anchor.after(b); }
         buttons.push(b);
       });
+      listeners.push(render);
       render();
       {% endif %}
+      var authBtn = document.getElementById('auth-btn');
+      if (FB && FB.apiKey && authBtn) {
+        var SDK = 'https://www.gstatic.com/firebasejs/10.14.1/';
+        var FLAG = 'read-sync-on';
+        var state = { f: null, user: null, merge: false };
+        var unsub = null;
+        var loading = null;
+        authBtn.hidden = false;
+        function setBtn(user) {
+          authBtn.textContent = user ? 'Google 로그아웃 (' + (user.email || '') + ')' : 'Google 로그인으로 읽음 동기화';
+          authBtn.className = 'btn btn-sm ' + (user ? 'btn-secondary' : 'btn-outline-secondary');
+        }
+        function setFlag(on) {
+          try { localStorage.setItem(FLAG, on ? '1' : '0'); } catch (e) {}
+        }
+        function load() {
+          if (!loading) {
+            loading = Promise.all([import(SDK + 'firebase-app.js'), import(SDK + 'firebase-auth.js'), import(SDK + 'firebase-firestore.js')]).then(function (m) {
+              var app = m[0].initializeApp(FB);
+              return { A: m[1], F: m[2], auth: m[1].getAuth(app), db: m[2].getFirestore(app) };
+            });
+          }
+          return loading;
+        }
+        function watch(f, user) {
+          if (unsub) { unsub(); unsub = null; }
+          sync = null;
+          state.user = user;
+          setBtn(user);
+          if (!user) return;
+          var ref = f.F.doc(f.db, 'users', user.uid);
+          var first = true;
+          sync = {
+            set: function (path, on) {
+              f.F.setDoc(ref, { reads: on ? f.F.arrayUnion(path) : f.F.arrayRemove(path) }, { merge: true }).catch(function () {});
+            }
+          };
+          unsub = f.F.onSnapshot(ref, function (snap) {
+            var next = new Set((snap.exists() && snap.data().reads) || []);
+            if (first && state.merge) {
+              var extra = [];
+              seen.forEach(function (p) { if (!next.has(p)) { next.add(p); extra.push(p); } });
+              if (extra.length) {
+                f.F.setDoc(ref, { reads: f.F.arrayUnion.apply(null, extra) }, { merge: true }).catch(function () {});
+              }
+            }
+            first = false;
+            state.merge = false;
+            seen = next;
+            save();
+            changed();
+          }, function () {});
+        }
+        function ensure() {
+          return load().then(function (f) {
+            if (!state.f) {
+              state.f = f;
+              f.A.onAuthStateChanged(f.auth, function (user) { watch(f, user); });
+            }
+            return f;
+          });
+        }
+        function preload() { load().catch(function () { loading = null; }); }
+        ['pointerenter', 'touchstart', 'focus'].forEach(function (ev) { authBtn.addEventListener(ev, preload, { once: true }); });
+        setBtn(null);
+        authBtn.onclick = function () {
+          if (state.user) {
+            ensure().then(function (f) { return f.A.signOut(f.auth); }).then(function () { setFlag(false); }).catch(function () {});
+            return;
+          }
+          ensure().then(function (f) {
+            state.merge = true;
+            return f.A.signInWithPopup(f.auth, new f.A.GoogleAuthProvider());
+          }).then(function () { setFlag(true); }).catch(function () { state.merge = false; });
+        };
+        var flagged = false;
+        try { flagged = localStorage.getItem(FLAG) === '1'; } catch (e) {}
+        if (flagged) ensure().catch(function () { loading = null; });
+      }
     });
   })();
 </script>
