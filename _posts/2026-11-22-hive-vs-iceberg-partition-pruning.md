@@ -109,6 +109,43 @@ PARTITIONED BY (days(event_ts));
 
 Hive 쪽에도 메타스토어 호출을 줄이는 방법이 있다. Athena의 파티션 프로젝션은 파티션 값과 위치를 Glue 조회 대신 테이블 속성으로 계산한다. 다만 데이터 파일 목록은 계산된 위치를 S3에서 나열해 얻고, 파티션 컬럼 조건을 직접 써야 하는 점도 그대로다.
 
+## 어느 쪽이 나은가: S3 요청 비용, 속도, 운영
+
+S3 요청 요금은 종류마다 다르다. S3 Standard(us-east-1) 기준으로 LIST는 1,000건에 0.005달러, GET은 1,000건에 0.0004달러라 LIST 한 번이 GET 12.5번 값이다. 일 파티션 365개에 파티션마다 파일 200개인 테이블에서 1년치를 읽는 쿼리를 예로 들면 이렇다.
+
+| 요청 | Hive 스타일 | Iceberg |
+|---|---|---|
+| 메타데이터 | 메타스토어(Glue) 파티션 조회 몇 번 | metadata.json 1개, manifest list 1개, 매니페스트 GET(예: 수십 개) |
+| 파일 목록 | 파티션마다 LIST, 365번 이상 | 없음 |
+| 파일 열기 | 7만 3천 개 파일의 footer GET | 파티션 조건 외에 다른 조건이 있으면 컬럼 통계로 거르고 남은 파일만 |
+
+쿼리 한 번의 요금은 둘 다 몇 센트 안쪽이라 크지 않다. 이 예에서는 LIST(약 0.2센트)보다 footer GET(약 3센트)이 비용 대부분을 차지한다. 차이는 두 군데서 커진다. 대시보드처럼 같은 쿼리가 하루 수천 번 돌 때, 그리고 파티션이 많아 LIST가 늘고 파일이 많은 경로는 LIST를 1,000개 단위로 이어서 돌려야 해서 계획 시간이 길어질 때다. 반대로 쓰기 쪽은 Iceberg가 요청을 더 쓴다. 커밋마다 매니페스트, manifest list, metadata.json을 새로 PUT하므로, 몇 초마다 커밋하는 스트리밍 적재는 메타데이터 파일이 빠르게 쌓인다.
+
+| 관점 | Hive 스타일 Parquet | Iceberg |
+|---|---|---|
+| 읽기 요청 | 파티션 수만큼 LIST, 파일 수만큼 footer GET | 매니페스트 GET, 고른 파일만 열기 |
+| 쓰기 요청 | 데이터 파일 PUT과 파티션 등록 | 데이터 파일 PUT에 커밋마다 메타데이터 PUT 몇 개 |
+| 계획 속도 | 파티션과 파일이 많을수록 느려짐 | 매니페스트 수와 크기를 따라감 |
+| 파일 건너뛰기 | 파티션 컬럼으로만, 나머지는 파일을 열어 봄 | 파티션과 컬럼 통계로 열기 전에 |
+| 쓰는 중 읽기 | 비 ACID 테이블은 쓰다 만 파일이 보일 수 있음 | 커밋 전 파일은 보이지 않음 |
+| 운영 작업 | 파티션 등록, 작은 파일 합치기 | 스냅샷 만료, 고아 파일 정리, 컴팩션, 매니페스트 합치기 |
+| 바꾸기 어려운 것 | 파티션 기준, 컬럼 이름·순서 | 카탈로그 선택, 엔진 버전 호환 |
+
+운영 부담은 사라지지 않고 자리를 옮긴다. Hive는 파티션을 제때 등록하고 메타스토어와 실제 폴더가 어긋나지 않게 맞추는 일이 중심이다. Iceberg는 등록이 필요 없는 대신 스냅샷과 메타데이터 파일이 쌓인다. `expire_snapshots`와 `remove_orphan_files`는 주기적으로, `rewrite_data_files`와 `rewrite_manifests`는 작은 파일이나 매니페스트가 쌓일 때 돌린다(Spark 프로시저 이름 기준). 이 정리를 빼먹으면 읽기 계획이 느려지고 S3 저장 비용이 는다.
+
+고르는 기준은 이렇다.
+
+| 이런 테이블이면 | 고르는 쪽 |
+|---|---|
+| 하루 한 번 쓰는 append 전용 배치, 파티션이 수백 개 이하, 쿼리가 늘 `dt` 조건을 줌 | Hive 스타일도 충분하다. Athena라면 파티션 프로젝션으로 Glue 조회를 줄인다 |
+| 파티션이 수천 개를 넘거나 파일이 많아 계획 시간이 길다 | Iceberg |
+| 파티션 컬럼이 아닌 컬럼으로 자주 거른다 | Iceberg + 그 컬럼으로 정렬 |
+| CDC upsert, 삭제, 여러 잡이 동시에 쓴다 | Iceberg. S3 위 Hive 스타일(비 ACID)은 원자적 커밋이 없다 |
+| 파티션 기준이나 스키마가 바뀔 가능성이 있다 | Iceberg |
+| 읽는 쪽이 Iceberg를 못 읽는 오래된 엔진이다 | Hive 스타일을 유지하거나 엔진부터 올린다 |
+
+정리하면, 파티션과 파일이 많은 테이블에서는 읽는 쪽 비용과 속도, 그리고 정합성에서 Iceberg가 낫고, 그 대가로 메타데이터 정리 작업을 운영에 넣어야 한다. 쓰기가 단순하고 쿼리 모양이 고정된 작은 테이블에서는 Hive 스타일과 파티션 프로젝션으로도 충분하다.
+
 ## 묻고 답하기
 
 Q. Iceberg 테이블도 S3에 `event_ts_day=2026-11-20/` 같은 폴더가 생기던데, 결국 디렉터리 기반 아닌가?
@@ -127,7 +164,8 @@ Q. Hive 테이블에서 `event_ts` 조건만 주면 아무 이득이 없나?
 - [Apache Iceberg: Spark procedures (rewrite_data_files, rewrite_manifests)](https://iceberg.apache.org/docs/latest/spark-procedures/)
 - [Spark SQL: Hive tables, spark.sql.hive.metastorePartitionPruning](https://spark.apache.org/docs/latest/sql-data-sources-hive-tables.html)
 - [Amazon S3 ListObjectsV2](https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListObjectsV2.html), [Athena partition projection](https://docs.aws.amazon.com/athena/latest/ug/partition-projection.html)
+- [Amazon S3 pricing (requests)](https://aws.amazon.com/s3/pricing/), [Apache Iceberg: Maintenance](https://iceberg.apache.org/docs/latest/maintenance/)
 
 ## English summary
 
-Both Hive-style Parquet tables and Iceberg tables prune partitions, but they pick files from different sources. A Hive table keeps the partition value in the directory name, so the engine asks the metastore for matching partitions, lists each partition's S3 prefix, and opens every file footer; a filter on the raw timestamp alone prunes nothing unless the query also filters the `dt` column. Iceberg writes each file's partition value and column bounds into manifests at commit time, so planning reads the manifest list and manifests, skips whole manifests and files before opening them, and never lists directories. Hidden partitioning turns a filter on `event_ts` into a filter on `days(event_ts)`, and partition specs can change without rewriting old files. Iceberg's file skipping still depends on clustered data, column stats limits, and compact manifests.
+Both Hive-style Parquet tables and Iceberg tables prune partitions, but they pick files from different sources. A Hive table keeps the partition value in the directory name, so the engine asks the metastore for matching partitions, lists each partition's S3 prefix, and opens every file footer; a filter on the raw timestamp alone prunes nothing unless the query also filters the `dt` column. Iceberg writes each file's partition value and column bounds into manifests at commit time, so planning reads the manifest list and manifests, skips whole manifests and files before opening them, and never lists directories. Hidden partitioning turns a filter on `event_ts` into a filter on `days(event_ts)`, and partition specs can change without rewriting old files. Iceberg's file skipping still depends on clustered data, column stats limits, and compact manifests. Iceberg wins on read requests, planning time and consistency, and pays for it with metadata maintenance; an append-only daily table with a fixed `dt` filter can stay Hive style with partition projection.
