@@ -36,6 +36,7 @@
     padding: .05rem .55rem; border-radius: 999px; font-size: .72rem; color: var(--text-muted-color, #6c757d);
     background: color-mix(in srgb, var(--text-muted-color, #6c757d) 14%, transparent);
   }
+  .read-progress { position: fixed; top: 0; left: 0; height: 3px; width: 0; background: var(--link-color, #2a7ae2); z-index: 1100; pointer-events: none; transition: width .08s linear; }
   .post-stats { margin-top: .5rem; font-size: .8rem; color: var(--text-muted-color, #6c757d); }
   .sync-box { opacity: 1; padding-top: .9rem; }
   .sync-hint { margin-top: .45rem; font-size: .72rem; line-height: 1.4; color: var(--text-muted-color, #6c757d); word-break: break-all; }
@@ -164,6 +165,7 @@
     var KEY = 'read-marks';
     var TAG_ORDER = {{ tag_names | jsonify }};
     var FB = {{ site.firebase | jsonify }};
+    var POSTS = [{% if page.layout == 'home' or page.layout == 'post' %}{% for p in site.posts %}[{{ p.url | jsonify }},{{ p.title | jsonify }}]{% unless forloop.last %},{% endunless %}{% endfor %}{% endif %}];
     var seen;
     try { seen = new Set(JSON.parse(localStorage.getItem(KEY) || '[]')); } catch (e) { return; }
     var listeners = [];
@@ -368,11 +370,30 @@
       });
       listeners.push(render);
       render();
+      var bar = document.createElement('div');
+      bar.className = 'read-progress';
+      document.body.appendChild(bar);
+      function updateBar() {
+        var h = document.documentElement;
+        var max = h.scrollHeight - h.clientHeight;
+        bar.style.width = (max > 0 ? Math.min(100, h.scrollTop / max * 100) : 0) + '%';
+      }
+      window.addEventListener('scroll', updateBar, { passive: true });
+      updateBar();
       statsEl = document.createElement('div');
       statsEl.className = 'post-stats';
       statsEl.hidden = true;
       if (buttons[0]) buttons[0].after(statsEl);
       {% endif %}
+      document.addEventListener('keydown', function (e) {
+        var t = e.target;
+        if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey || (t && (/^(input|textarea|select)$/i.test(t.tagName) || t.isContentEditable))) return;
+        var trigger = document.getElementById('search-trigger');
+        if (!trigger) return;
+        e.preventDefault();
+        trigger.click();
+        setTimeout(function () { var i = document.getElementById('search-input'); if (i) i.focus(); }, 60);
+      });
       var authBtn = document.getElementById('auth-btn');
       if (FB && FB.apiKey && authBtn) {
         var SDK = 'https://www.gstatic.com/firebasejs/10.14.1/';
@@ -411,6 +432,14 @@
           }
           return loading;
         }
+        function countRead(f, user, path, on) {
+          var sid = statId(path);
+          var batch = f.F.writeBatch(f.db);
+          var marker = f.F.doc(f.db, 'stats', sid, 'readers', user.uid);
+          if (on) { batch.set(marker, { at: f.F.serverTimestamp() }); } else { batch.delete(marker); }
+          batch.set(f.F.doc(f.db, 'stats', sid), { reads: f.F.increment(on ? 1 : -1) }, { merge: true });
+          batch.commit().catch(function () {});
+        }
         function watch(f, user) {
           if (unsub) { unsub(); unsub = null; }
           sync = null;
@@ -423,7 +452,7 @@
           sync = {
             set: function (path, on) {
               f.F.setDoc(ref, { reads: on ? f.F.arrayUnion(path) : f.F.arrayRemove(path) }, { merge: true }).catch(function () {});
-              f.F.setDoc(f.F.doc(f.db, 'stats', statId(path)), { reads: f.F.increment(on ? 1 : -1) }, { merge: true }).catch(function () {});
+              countRead(f, user, path, on);
             },
             theme: function (mode) {
               if (mode === remoteTheme) return;
@@ -438,9 +467,7 @@
               seen.forEach(function (p) { if (!next.has(p)) { next.add(p); extra.push(p); } });
               if (extra.length) {
                 f.F.setDoc(ref, { reads: f.F.arrayUnion.apply(null, extra) }, { merge: true }).catch(function () {});
-                extra.forEach(function (p) {
-                  f.F.setDoc(f.F.doc(f.db, 'stats', statId(p)), { reads: f.F.increment(1) }, { merge: true }).catch(function () {});
-                });
+                extra.forEach(function (p) { countRead(f, user, p, true); });
               }
             }
             var rt = snap.exists() ? snap.data().theme : null;
@@ -502,6 +529,39 @@
             }).catch(function () { loading = null; });
           };
           if (window.requestIdleCallback) { requestIdleCallback(showStats, { timeout: 3000 }); } else { setTimeout(showStats, 1500); }
+        }
+        var panel = document.querySelector('#panel-wrapper .access');
+        if (panel && POSTS.length) {
+          var topBox = document.createElement('section');
+          topBox.id = 'access-top';
+          topBox.hidden = true;
+          topBox.innerHTML = '<h2 class="panel-heading">많이 본 글</h2><ul class="content list-unstyled ps-0 pb-1 ms-1 mt-2"></ul>';
+          panel.appendChild(topBox);
+          var showTop = function () {
+            load().then(function (f) {
+              var q = f.F.query(f.F.collection(f.db, 'stats'), f.F.orderBy('views', 'desc'), f.F.limit(12));
+              return f.F.getDocs(q).then(function (snap) {
+                var byId = {};
+                POSTS.forEach(function (p) { byId[statId(p[0])] = p; });
+                var list = topBox.querySelector('ul');
+                var n = 0;
+                snap.forEach(function (d) {
+                  var p = byId[d.id];
+                  if (!p || n >= 5 || (d.data().views || 0) < 1) return;
+                  n++;
+                  var li = document.createElement('li');
+                  li.className = 'text-truncate lh-lg';
+                  var a = document.createElement('a');
+                  a.href = p[0];
+                  a.textContent = p[1];
+                  li.appendChild(a);
+                  list.appendChild(li);
+                });
+                if (n) topBox.hidden = false;
+              });
+            }).catch(function () { loading = null; });
+          };
+          if (window.requestIdleCallback) { requestIdleCallback(showTop, { timeout: 4000 }); } else { setTimeout(showTop, 2000); }
         }
         var flagged = false;
         try { flagged = localStorage.getItem(FLAG) === '1'; } catch (e) {}
