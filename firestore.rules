@@ -11,6 +11,19 @@ service cloud.firestore {
         && (!('theme' in request.resource.data)
             || request.resource.data.theme in ['dark', 'light', 'system']);
     }
+    // Per-post counters: stats/{p<hash>} = { views, reads }. Anyone may add 1 view; signed-in users may move reads by exactly one.
+    match /stats/{id} {
+      function oldVal(f) { return (resource != null && f in resource.data) ? resource.data[f] : 0; }
+      function newVal(f) { return f in request.resource.data ? request.resource.data[f] : 0; }
+      allow read: if true;
+      allow create, update: if id.matches('p[a-z0-9]{1,12}')
+        && request.resource.data.keys().hasOnly(['views', 'reads'])
+        && newVal('views') is int && newVal('reads') is int
+        && newVal('views') >= 0 && newVal('reads') >= 0
+        && newVal('views') - oldVal('views') >= 0 && newVal('views') - oldVal('views') <= 1
+        && newVal('reads') - oldVal('reads') >= -1 && newVal('reads') - oldVal('reads') <= 1
+        && (newVal('reads') == oldVal('reads') || request.auth != null);
+    }
     match /{document=**} {
       allow read, write: if false;
     }
