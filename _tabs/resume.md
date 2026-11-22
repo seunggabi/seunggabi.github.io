@@ -33,7 +33,7 @@ seunggabi@gmail.com · [LinkedIn](https://www.linkedin.com/in/seunggabi/) · [Gi
 - Kotlin 배치 잡: Hive→DynamoDB 적재, JSON→Hive 적재, 쿼리 결과 S3 추출, S3 버전 복구, SQL 결과 Slack 알림
 
 **버킷플레이스 (오늘의집)** · Data Engineer · 2022.04 – 2022.10
-- 광고 리포트 배치를 Spark 잡과 Spring Batch로 나눠 집계, Kotlin·Spring Boot 서비스의 빌드·배포 구조 ([글](/posts/ad-platform-ci-cd/))
+- 광고 리포트 배치를 Spark 잡과 Spring Batch로 나눠 집계, Kotlin·Spring Boot 서비스의 빌드·배포 구조
 - OLAP 데이터 동기화를 API 호출에서 Kafka 비동기 방식으로 전환해 동기화 장애 0건, 모노 레포와 Spring Config Server, 글로벌 로그 스키마 설계 참여
 
 **NAVER** · 2016.12 – 2022.04

@@ -108,7 +108,7 @@ source는 출력 버퍼를 기다리느라 85%를 썼다. 병목은 backpressure
 
 2.0에서 per-job 모드가 없어져서 남은 건 둘이다. application 모드는 잡의 `main()`을 JobManager에서 실행하고, 클러스터 수명이 그 애플리케이션과 같다. session 모드는 오래 떠 있는 클러스터에 여러 잡을 제출한다. 시작이 빠른 대신, TaskManager 하나가 죽으면 거기에 태스크가 있던 모든 잡이 함께 실패한다. CLI나 SQL Client로 session에 제출하면 `main()`은 클라이언트에서 돌고, JobGraph만 클러스터로 간다.
 
-[광고 서비스 배포 글](/posts/ad-platform-ci-cd/)의 Flink 잡은 Flink 1.15 이미지의 Flink 홈 아래에 잡 jar를 넣었고, 잡과 환경마다 Helm values 파일의 이미지 태그를 바꿨다. 한 모듈을 설정만 달리해 잡 두 개로 띄웠다.
+광고 플랫폼에서 배포한 Flink 잡은 Flink 1.15 이미지의 Flink 홈 아래에 잡 jar를 넣었고, 잡과 환경마다 Helm values 파일의 이미지 태그를 바꿨다. 한 모듈을 설정만 달리해 잡 두 개로 띄웠다.
 
 `jobmanager.scheduler: adaptive`를 켜면 스케줄러가 먼저 필요한 슬롯을 선언하고, 받은 만큼으로 병렬도를 정한다. TaskManager를 잃으면 병렬도를 낮춰 계속 돌고, 슬롯이 돌아오면 설정한 병렬도까지 다시 올린다. 실행 중인 잡의 정점별 병렬도 범위는 `PUT /jobs/<job-id>/resource-requirements`로 바꿀 수 있다. 대가도 분명하다. 스트리밍 잡에서만 쓰고, 부분 재시작 없이 장애마다 잡 전체를 다시 띄우며, 병렬도가 바뀔 때마다 마지막 체크포인트에서 재시작한다. 스트리밍 잡의 기본 스케줄러는 여전히 `Default`다.
 

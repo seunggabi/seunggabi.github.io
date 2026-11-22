@@ -93,7 +93,7 @@ containers:
 
 이 컨테이너의 최대 힙은 1.5GiB이고, 힙 밖 메모리에 512MiB가 남는다. 메모리 request와 limit을 같게 두면 사용량이 request를 넘는 구간이 없어, 노드 메모리가 모자랄 때 request를 넘은 Pod로 꼽히지 않는다.
 
-[광고 플랫폼 CI/CD 글](/posts/ad-platform-ci-cd/)의 Spring Boot 공용 Dockerfile은 JDK 11 위에서 컨테이너 메모리의 75%를 힙으로 썼다. 서비스마다 메모리가 달라도 Dockerfile 하나로 맞출 수 있는 대신, 나머지 25%로 힙 밖 메모리를 감당해야 한다.
+광고 플랫폼 빌드 구조의 Spring Boot 공용 Dockerfile은 JDK 11 위에서 컨테이너 메모리의 75%를 힙으로 썼다. 서비스마다 메모리가 달라도 Dockerfile 하나로 맞출 수 있는 대신, 나머지 25%로 힙 밖 메모리를 감당해야 한다.
 
 ## 참고 자료
 
