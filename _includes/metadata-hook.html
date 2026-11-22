@@ -17,6 +17,10 @@
   #sidebar li.nav-item:has(> a[href$="/resume/"])::before { content: "커리어"; }
   #sidebar li.nav-item:has(> a[href$="/categories/"])::before { content: "글 찾기"; }
   .sidebar-intro { align-self: stretch; margin: 0; padding: 1.25rem 1rem 0 2.5rem; font-size: .8rem; line-height: 1.6; opacity: .7; }
+  /* Sidebar bottom: the mode toggle sits on its own row so the five icons (github, email, rss, linkedin, music) fit on one line */
+  #sidebar .sidebar-bottom.d-flex > .btn-group { flex: 0 0 auto; margin-right: 100%; }
+  #sidebar .sidebar-bottom .icon-border { display: none; }
+  #sidebar .sidebar-bottom.d-flex > a:not(:last-child) { margin-right: .5rem; }
   /* Wide screens: Chirpy caps the content at 1250px; use more of the width */
   @media all and (min-width: 1650px) {
     #main-wrapper > .container { max-width: 1500px; }
