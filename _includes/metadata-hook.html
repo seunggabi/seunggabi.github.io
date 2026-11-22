@@ -737,3 +737,81 @@
     });
   })();
 </script>
+<!-- Keyboard shortcuts: / search, n newer post, p older post, t top, ? help. Ignored while typing or with modifier keys. -->
+<style>
+  #kbd-help { position: fixed; inset: 0; z-index: 2000; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,.45); }
+  #kbd-help[hidden] { display: none; }
+  #kbd-help .kbd-box { max-width: 22rem; width: calc(100% - 2rem); padding: 1.1rem 1.25rem; border-radius: .7rem; background: var(--card-bg, #fff); color: var(--text-color, #333); box-shadow: 0 8px 30px rgba(0,0,0,.3); }
+  #kbd-help h2 { font-size: 1.05rem; margin: 0 0 .75rem; }
+  #kbd-help dl { display: grid; grid-template-columns: auto 1fr; gap: .4rem .9rem; margin: 0 0 .9rem; font-size: .9rem; }
+  #kbd-help dt kbd { padding: .1rem .45rem; border-radius: .3rem; border: 1px solid var(--btn-border-color, rgba(128,128,128,.5)); background: transparent; color: inherit; font-size: .85em; }
+  #kbd-help dd { margin: 0; }
+  #kbd-help button:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+</style>
+<script>
+  (function () {
+    document.addEventListener('DOMContentLoaded', function () {
+      var help = null, opener = null;
+      function typing(t) {
+        return t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName));
+      }
+      function navLink(kind) {
+        var links = document.querySelectorAll('.post-navigation a');
+        var re = kind === 'newer' ? /newer|다음/i : /older|이전/i;
+        for (var i = 0; i < links.length; i++) {
+          var label = (links[i].getAttribute('aria-label') || '') + ' ' + (links[i].textContent || '');
+          if (re.test(label)) return links[i];
+        }
+        return null;
+      }
+      function build() {
+        help = document.createElement('div');
+        help.id = 'kbd-help';
+        help.hidden = true;
+        help.innerHTML = '<div class="kbd-box" role="dialog" aria-modal="true" aria-labelledby="kbd-title">' +
+          '<h2 id="kbd-title">키보드 단축키</h2><dl>' +
+          '<dt><kbd>/</kbd></dt><dd>검색</dd>' +
+          '<dt><kbd>n</kbd></dt><dd>다음(최신) 글</dd>' +
+          '<dt><kbd>p</kbd></dt><dd>이전(오래된) 글</dd>' +
+          '<dt><kbd>t</kbd></dt><dd>맨 위로</dd>' +
+          '<dt><kbd>?</kbd></dt><dd>이 도움말</dd></dl>' +
+          '<button type="button" class="btn btn-sm btn-primary">닫기</button></div>';
+        help.addEventListener('click', function (e) { if (e.target === help || e.target.tagName === 'BUTTON') close(); });
+        document.body.appendChild(help);
+      }
+      function open() {
+        if (!help) build();
+        opener = document.activeElement;
+        help.hidden = false;
+        help.querySelector('button').focus();
+      }
+      function close() {
+        if (!help || help.hidden) return;
+        help.hidden = true;
+        if (opener && opener.focus) opener.focus();
+      }
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') { close(); return; }
+        if (e.ctrlKey || e.metaKey || e.altKey || typing(e.target)) return;
+        if (help && !help.hidden) {
+          if (e.key === 'Tab') e.preventDefault();
+          return;
+        }
+        var go;
+        switch (e.key) {
+          case '/':
+            var input = document.getElementById('search-input');
+            var trigger = document.getElementById('search-trigger');
+            if (input && input.offsetParent === null && trigger) trigger.click();
+            if (input) { e.preventDefault(); input.focus(); }
+            break;
+          case 'n': go = navLink('newer'); break;
+          case 'p': go = navLink('older'); break;
+          case 't': window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); break;
+          case '?': e.preventDefault(); open(); break;
+        }
+        if (go && go.href) location.href = go.href;
+      });
+    });
+  })();
+</script>
