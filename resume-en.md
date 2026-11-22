@@ -6,7 +6,7 @@ permalink: /resume-en/
 
 <style>
 @media print {
-  #sidebar, #topbar-wrapper, #panel-wrapper, footer, #search-result-wrapper, .post-tail-wrapper, #back-to-top { display: none !important; }
+  #sidebar, #topbar-wrapper, #panel-wrapper, footer, #search-result-wrapper, .post-tail-wrapper, #back-to-top, #music-extra, #music-btn, #music-nudge { display: none !important; }
   #main-wrapper, #main-wrapper > .container { margin: 0 !important; padding: 0 !important; max-width: 100% !important; }
   body { font-size: 11px; }
   h1, h2 { margin-top: 0.6em !important; }
@@ -14,7 +14,7 @@ permalink: /resume-en/
 </style>
 
 **Seunggab Kim** · Data Engineer<br>
-seunggabi@gmail.com · [LinkedIn](https://www.linkedin.com/in/seunggabi/) · [GitHub](https://github.com/seunggabi) · [Blog](https://seunggabi.github.io/) · [한국어](/resume/)
+seunggabi@gmail.com · [LinkedIn](https://www.linkedin.com/in/seunggabi/) · [GitHub](https://github.com/seunggabi) · [Blog](https://seunggabi.github.io/) · [한국어](/resume/) · [PDF](/assets/pdf/seunggabi-resume-en.pdf)
 
 Data engineer with 10 years in software and 8+ years in data engineering. I build and run data platforms that go from CDC and streaming to a lakehouse and BI. When the root cause is in open source, I fix it upstream; my changes are merged into Apache Spark, Superset and Airflow.
 

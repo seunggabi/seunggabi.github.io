@@ -7,6 +7,7 @@ mermaid: true
 image:
   path: /assets/img/posts/iceberg-kafka-connect-mixed-case/pr.webp
   alt: databricks/iceberg-kafka-connect PR 349 화면
+pin: true
 ---
 
 Iceberg Kafka Connect 싱크 태스크가 `NullPointerException` 한 줄을 남기고 죽었다. 어느 테이블인지, 어느 컬럼인지는 로그 어디에도 없었다. 태스크는 손으로 재시작해야 했고, 그 태스크가 맡은 다른 테이블도 같이 멈췄다.

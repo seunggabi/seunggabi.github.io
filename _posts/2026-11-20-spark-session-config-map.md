@@ -6,6 +6,7 @@ tags: [open-source, spark, scala, kotlin, api-design]
 image:
   path: /assets/img/posts/spark-session-config-map/jira.webp
   alt: SPARK-40163 JIRA 화면
+pin: true
 ---
 
 Spark 설정을 YAML 파일에 모아 두고 Kotlin으로 `SparkSession`을 만들던 코드가 있었다. 파일에서 읽은 맵을 빌더에 넣으려면 값의 타입마다 분기를 해야 했다.

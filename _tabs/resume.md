@@ -7,7 +7,7 @@ title: Resume
 
 <style>
 @media print {
-  #sidebar, #topbar-wrapper, #panel-wrapper, footer, #search-result-wrapper, .post-tail-wrapper, #back-to-top { display: none !important; }
+  #sidebar, #topbar-wrapper, #panel-wrapper, footer, #search-result-wrapper, .post-tail-wrapper, #back-to-top, #music-extra, #music-btn, #music-nudge { display: none !important; }
   #main-wrapper, #main-wrapper > .container { margin: 0 !important; padding: 0 !important; max-width: 100% !important; }
   body { font-size: 11px; }
   h1, h2 { margin-top: 0.6em !important; }
@@ -15,7 +15,7 @@ title: Resume
 </style>
 
 **김승갑 (Seunggab Kim)** · Data Engineer<br>
-seunggabi@gmail.com · [LinkedIn](https://www.linkedin.com/in/seunggabi/) · [GitHub](https://github.com/seunggabi) · [Blog](https://seunggabi.github.io/) · [English](/resume-en/)
+seunggabi@gmail.com · [LinkedIn](https://www.linkedin.com/in/seunggabi/) · [GitHub](https://github.com/seunggabi) · [Blog](https://seunggabi.github.io/) · [English](/resume-en/) · [PDF](/assets/pdf/seunggabi-resume-ko.pdf)
 
 10년 차 개발자이고, 그중 8년 넘게 데이터 엔지니어링을 했습니다. CDC, 스트리밍, 레이크하우스로 이어지는 데이터 플랫폼을 만들고 운영합니다. 문제의 원인이 오픈소스에 있으면 업스트림에 직접 고쳐서 올리고, Apache Spark·Superset·Airflow에 머지됐습니다.
 

@@ -7,6 +7,7 @@ mermaid: true
 image:
   path: /assets/img/posts/pyathena-complex-types/pr.webp
   alt: pyathena-dev/PyAthena PR 763 머지 화면
+pin: true
 ---
 
 Superset 차트에서 `MAP<VARCHAR, VARCHAR>` 컬럼 일부가 NULL로 나왔다. 같은 테이블에서 어떤 행은 값이 잘 보이고 어떤 행은 비어 있었다. 데이터가 파이프라인 어딘가에서 빠졌다고 생각했다.
