@@ -94,6 +94,15 @@
     </div>
   </div>
 </template>
+{% if page.layout == 'home' %}
+<template id="home-all-posts">
+  <ul class="list-unstyled ps-0 home-unread-list">
+    {%- for p in site.posts %}
+    <li class="py-2 border-bottom"><a href="{{ p.url | relative_url }}">{{ p.title }}</a><div class="small text-muted">{{ p.date | date: "%Y-%m-%d" }}{% if p.categories.size > 0 %} · {{ p.categories | join: " / " }}{% endif %}</div></li>
+    {%- endfor %}
+  </ul>
+</template>
+{% endif %}
 <template id="sidebar-extra">
   <p class="sidebar-intro">Data Engineer<br>Batch · Streaming · CDC · Lakehouse<br>Spark · Airflow · Kafka · Flink · EMR</p>
 </template>
@@ -181,6 +190,36 @@
           (a.closest('article.card') || a).classList.add('is-read');
         }
       });
+      {% if page.layout == 'home' %}
+      var homeList = document.getElementById('post-list');
+      if (homeList) {
+        var HOME_KEY = 'read-filter-unread';
+        var pager = document.querySelector('nav[aria-label="Page Navigation"]') || document.querySelector('.pagination');
+        var unreadWrap = document.getElementById('home-all-posts').content.cloneNode(true).firstElementChild;
+        Array.from(unreadWrap.children).forEach(function (li) {
+          if (seen.has(new URL(li.querySelector('a').href, location.href).pathname)) li.remove();
+        });
+        unreadWrap.hidden = true;
+        var homeSw = document.createElement('label');
+        homeSw.className = 'form-check form-switch mb-3';
+        homeSw.innerHTML = '<input class="form-check-input" type="checkbox" role="switch"> <span class="form-check-label"></span>';
+        homeSw.querySelector('span').textContent = '안 읽은 글만 보기 (' + unreadWrap.children.length + '편, 전체 페이지에서)';
+        var homeBox = homeSw.querySelector('input');
+        homeList.before(homeSw);
+        homeList.after(unreadWrap);
+        function applyHome() {
+          unreadWrap.hidden = !homeBox.checked;
+          homeList.style.display = homeBox.checked ? 'none' : '';
+          if (pager) pager.style.display = homeBox.checked ? 'none' : '';
+        }
+        try { homeBox.checked = localStorage.getItem(HOME_KEY) === '1'; } catch (e) {}
+        homeBox.onchange = function () {
+          try { localStorage.setItem(HOME_KEY, homeBox.checked ? '1' : '0'); } catch (e) {}
+          applyHome();
+        };
+        applyHome();
+      }
+      {% endif %}
       {% if page.layout == 'archives' or page.layout == 'tag' or page.layout == 'category' %}
       var FILTER_KEY = 'read-filter-unread';
       var list = document.querySelector('main .content') || document.querySelector('main');
