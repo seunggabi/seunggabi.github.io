@@ -827,3 +827,53 @@
     });
   })();
 </script>
+<!-- Series navigation: lists the other posts in the same category pair on a post page, with the current position. Data comes from /posts.json. -->
+<style>
+  #series-nav { margin: 2rem 0 1rem; padding: .9rem 1.1rem; border-radius: .6rem; border: 1px solid var(--btn-border-color, rgba(128,128,128,.3)); }
+  #series-nav h2 { font-size: 1rem; margin: 0 0 .5rem; border: 0; padding: 0; }
+  #series-nav h2::before { content: none; }
+  #series-nav ol { margin: 0; padding-left: 1.4rem; font-size: .9rem; line-height: 1.8; }
+  #series-nav li[aria-current="page"] { font-weight: 700; }
+  #series-nav li.is-read-item a { opacity: .75; }
+</style>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var anchor = document.querySelector('.post-navigation');
+    if (!anchor) return;
+    fetch('/posts.json').then(function (r) { return r.json(); }).then(function (all) {
+      var here = location.pathname;
+      var cur = all.filter(function (p) { return p.url === here; })[0];
+      if (!cur || !cur.cat) return;
+      var group = all.filter(function (p) { return p.cat === cur.cat; });
+      if (group.length < 2) return;
+      group.reverse();
+      var seen = [];
+      try { seen = JSON.parse(localStorage.getItem('read-marks') || '[]'); } catch (e) {}
+      var idx = group.indexOf(cur);
+      var box = document.createElement('nav');
+      box.id = 'series-nav';
+      box.setAttribute('aria-labelledby', 'series-nav-title');
+      var h = document.createElement('h2');
+      h.id = 'series-nav-title';
+      h.textContent = cur.cat + ' 시리즈 (' + (idx + 1) + '/' + group.length + ')';
+      var ol = document.createElement('ol');
+      group.forEach(function (p) {
+        var li = document.createElement('li');
+        if (p === cur) {
+          li.setAttribute('aria-current', 'page');
+          li.textContent = p.title;
+        } else {
+          if (seen.indexOf(p.url) >= 0) li.className = 'is-read-item';
+          var a = document.createElement('a');
+          a.href = p.url;
+          a.textContent = p.title;
+          li.appendChild(a);
+        }
+        ol.appendChild(li);
+      });
+      box.appendChild(h);
+      box.appendChild(ol);
+      anchor.parentNode.insertBefore(box, anchor);
+    }).catch(function () {});
+  });
+</script>
