@@ -363,6 +363,15 @@
         var state = { f: null, user: null, merge: false };
         var unsub = null;
         var loading = null;
+        var remoteTheme = null;
+        function localTheme() {
+          var v = null;
+          try { v = localStorage.getItem('theme'); } catch (e) {}
+          return v === 'dark' || v === 'light' ? v : 'system';
+        }
+        function applyTheme(mode) {
+          if (window.Theme && window.Theme.isToggleable && (mode === 'dark' || mode === 'light' || mode === 'system') && mode !== localTheme()) window.Theme.update(mode);
+        }
         authBtn.hidden = false;
         function setBtn(user) {
           var hint = document.getElementById('sync-hint');
@@ -388,6 +397,7 @@
         function watch(f, user) {
           if (unsub) { unsub(); unsub = null; }
           sync = null;
+          remoteTheme = null;
           state.user = user;
           setBtn(user);
           if (!user) return;
@@ -396,6 +406,11 @@
           sync = {
             set: function (path, on) {
               f.F.setDoc(ref, { reads: on ? f.F.arrayUnion(path) : f.F.arrayRemove(path) }, { merge: true }).catch(function () {});
+            },
+            theme: function (mode) {
+              if (mode === remoteTheme) return;
+              remoteTheme = mode;
+              f.F.setDoc(ref, { theme: mode }, { merge: true }).catch(function () {});
             }
           };
           unsub = f.F.onSnapshot(ref, function (snap) {
@@ -406,6 +421,13 @@
               if (extra.length) {
                 f.F.setDoc(ref, { reads: f.F.arrayUnion.apply(null, extra) }, { merge: true }).catch(function () {});
               }
+            }
+            var rt = snap.exists() ? snap.data().theme : null;
+            if (rt === 'dark' || rt === 'light' || rt === 'system') {
+              remoteTheme = rt;
+              applyTheme(rt);
+            } else if (first) {
+              sync.theme(localTheme());
             }
             first = false;
             state.merge = false;
@@ -423,6 +445,9 @@
             return f;
           });
         }
+        window.addEventListener('message', function (ev) {
+          if (ev.source === window && ev.data && ev.data.id === 'theme-updated' && sync) sync.theme(localTheme());
+        });
         function preload() { load().catch(function () { loading = null; }); }
         ['pointerenter', 'touchstart', 'focus'].forEach(function (ev) { authBtn.addEventListener(ev, preload, { once: true }); });
         setBtn(null);
