@@ -8,7 +8,7 @@ mermaid: true
 
 `df.filter(...).groupBy(...).agg(...)`까지 써도 클러스터에서는 아무 일도 일어나지 않는다. `count()`나 `write`를 부르는 순간 드라이버가 계획을 세우고, 셔플 지점에서 계획을 stage로 자르고, stage마다 파티션 수만큼 task를 만들어 executor에 보낸다. Spark UI의 job, stage, task 숫자와 explain의 `*(1)`이 어디서 나오는지 알면 느린 잡을 볼 때 어디부터 열어 볼지 정해진다.
 
-이전 회사에서 음악·오디오 서비스의 데이터 쪽을 맡으며 [연말 결산 Spark SQL 잡](/posts/year-end-recap-spark/)과 [PySpark 지표 배치](/posts/pyspark-indicator-batch/)를 만들었고, 커머스 광고 플랫폼의 [광고 리포트 배치](/posts/ad-report-batch/)에서는 Kotlin으로 Spark 잡을 썼다. 세 곳 모두 SQL 문자열을 `spark.sql`에 넘겼고, 그 뒤 실행 방식은 Spark가 정했다.
+이전 회사에서 음악·오디오 서비스의 데이터 쪽을 맡으며 [연말 결산 Spark SQL 잡](/posts/year-end-recap-spark/)과 [PySpark 지표 배치](/posts/pyspark-indicator-batch/)를 만들었고, 커머스 광고 플랫폼의 광고 리포트 배치에서는 Kotlin으로 Spark 잡을 썼다. 세 곳 모두 SQL 문자열을 `spark.sql`에 넘겼고, 그 뒤 실행 방식은 Spark가 정했다.
 
 버전은 Spark 4.3.0 기준이다.
 

@@ -76,7 +76,7 @@ driver는 태스크를 돌리지 않으니 executor와 원인이 다르다.
 
 `collect()`, `collectAsList()`, `toPandas()`는 결과 전체를 driver로 모은다. Arrow를 써도 `toPandas()`는 모든 행을 driver에 올린다. `spark.driver.maxResultSize`(기본 1g)는 action 하나의 직렬화 결과가 이 값을 넘으면 잡을 중단시켜 OOM 전에 막아 준다. 이 값을 0이나 큰 값으로 풀면 그 보호가 사라진다.
 
-[광고 리포트 배치 글](/posts/ad-report-batch/)의 Kotlin 잡은 쿼리 결과를 `collectAsList()`로 driver에 모아 문자열로 만든다. 결과가 작은 메일 첨부나 API 본문용 잡에 맞춘 방식이다. [Spark Streaming 적재 글](/posts/spark-streaming-to-hive/)도 키별로 합친 결과를 `collect`해 HDFS 파일에 붙였고, 그 글에 적은 대로 한 배치의 로그가 많아지면 driver 메모리가 부담이 되는 구조였다. 두 경우 모두 driver 메모리가 결과 크기의 상한이 된다.
+광고 리포트 배치의 Kotlin 잡은 쿼리 결과를 `collectAsList()`로 driver에 모아 문자열로 만든다. 결과가 작은 메일 첨부나 API 본문용 잡에 맞춘 방식이다. [Spark Streaming 적재 글](/posts/spark-streaming-to-hive/)도 키별로 합친 결과를 `collect`해 HDFS 파일에 붙였고, 그 글에 적은 대로 한 배치의 로그가 많아지면 driver 메모리가 부담이 되는 구조였다. 두 경우 모두 driver 메모리가 결과 크기의 상한이 된다.
 
 브로드캐스트 조인도 driver를 거친다. 작은 쪽 행을 driver로 모아 해시 테이블을 만든 뒤 executor로 보낸다. 크기 추정이 틀려 큰 테이블이 브로드캐스트되면 driver가 먼저 넘친다. 추정 방식과 상한은 [조인 전략 글](/posts/spark-join-strategies/)에 있다.
 

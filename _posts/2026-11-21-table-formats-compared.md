@@ -108,7 +108,7 @@ Unity Catalog OSS는 Delta용 REST API와 함께 Iceberg REST API도 연다. Del
 - Flink 스트리밍 upsert와 쓰기 중 키 조회 비용을 감수할 수 있으면 Hudi MOR의 인덱스와 테이블 서비스가 맞는다.
 - Athena에서도 쓰고 Flink, Spark도 같은 테이블에 써야 하면 Iceberg다. Athena에서 쓰기까지 되는 포맷은 Iceberg뿐이다.
 
-[Spark Streaming 글](/posts/spark-streaming-to-hive/)의 일 배치와 [광고 리포트 배치](/posts/ad-report-batch/)의 S3 복사 잡은 날짜 파티션 단위로 쓰고 다시 돌리는 Hive 스타일이었다. 임시 경로 교체나 `MSCK REPAIR TABLE` 같은 단계를 잡이 직접 맡는 대신 어떤 엔진에서도 읽힌다. 어느 테이블 포맷으로 옮겨도 그 단계는 커밋 한 번으로 흡수되고, 남는 차이는 위의 표들이다.
+[Spark Streaming 글](/posts/spark-streaming-to-hive/)의 일 배치와 광고 리포트 배치의 S3 복사 잡은 날짜 파티션 단위로 쓰고 다시 돌리는 Hive 스타일이었다. 임시 경로 교체나 `MSCK REPAIR TABLE` 같은 단계를 잡이 직접 맡는 대신 어떤 엔진에서도 읽힌다. 어느 테이블 포맷으로 옮겨도 그 단계는 커밋 한 번으로 흡수되고, 남는 차이는 위의 표들이다.
 
 ```sql
 -- Spark SQL, 포맷마다 런타임과 spark_catalog를 따로 설정한 세션 (Iceberg 1.12, Delta 4.4, Hudi 1.2)

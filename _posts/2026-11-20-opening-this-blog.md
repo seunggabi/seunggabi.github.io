@@ -17,7 +17,6 @@ pin: true
 | 글 | 무엇을 보여 주나 |
 |---|---|
 | [PyAthena 복합 타입 글](/posts/pyathena-complex-types/) | Athena 복합 타입이 NULL로 사라지던 문제를 업스트림에서 고친 과정 |
-| [광고 리포트 배치 글](/posts/ad-report-batch/) | 광고 리포트를 Spark 잡과 Spring Batch로 나눠 집계한 구조 |
 | [Superset epoch_us 글](/posts/superset-epoch-us/) | 실무에서 막힌 문제를 업스트림에 직접 고쳐 머지한 과정 |
 
 전체 경력과 기여 목록은 [포트폴리오](/portfolio/)에 있다.

@@ -7,7 +7,7 @@ tags: [hive, hive-metastore, partitioning, athena, aws-glue, spark, concept]
 
 S3에 `dt=2026-11-19/` 폴더가 생겼고 파일도 들어 있는데, Athena에서 그날을 조회하면 0건이 나온다. 에러는 없다. Hive 스타일 테이블의 파티션은 저장소의 디렉터리와 메타스토어의 파티션 항목, 두 곳에 따로 있고, 쿼리 엔진은 메타스토어에 등록된 파티션만 읽는다. 두 곳을 맞추는 일은 쓰는 쪽이 따로 해야 한다.
 
-[광고 리포트 배치 글](/posts/ad-report-batch/)의 S3 계정 간 복사 잡에서는 복사를 마친 뒤 `MSCK REPAIR TABLE`을 돌리는 단계가 이 일을 맡았다.
+광고 리포트 배치의 S3 계정 간 복사 잡에서는 복사를 마친 뒤 `MSCK REPAIR TABLE`을 돌리는 단계가 이 일을 맡았다.
 
 버전은 Hive 4.0, Spark 4.3, Athena 엔진 버전 3 기준이다.
 

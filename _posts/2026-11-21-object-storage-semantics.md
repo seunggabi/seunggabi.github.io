@@ -88,7 +88,7 @@ spark.sql.parquet.output.committer.class org.apache.spark.internal.io.cloud.Bind
 
 빠지는 경우도 있다. S3A committer와 S3는 Spark의 dynamic partition overwrite 조건을 만족하지 못해 `PathOutputCommitter does not support dynamicPartitionOverwrite`로 실패한다. EMRFS committer도 이 모드와 사용자 지정 파티션 위치, RDD API, `s3a://` 경로에서는 쓰이지 않는다. EMR은 dynamic partition overwrite만 따로 EMRFS S3-optimized commit protocol(5.30.0, 6.2.0부터 기본)로 rename을 피한다.
 
-`_SUCCESS`는 읽는 쪽의 단서가 된다. 옛 committer는 0바이트 파일을 남기고, S3A committer는 `committer` 필드가 든 JSON을 남긴다. [광고 리포트 배치](/posts/ad-report-batch/)의 reader는 `s3a://` 경로를 나열할 때 이름이 `_`로 시작하는 파일을 건너뛰었다. 이런 marker 파일을 데이터로 읽지 않는 규칙이다.
+`_SUCCESS`는 읽는 쪽의 단서가 된다. 옛 committer는 0바이트 파일을 남기고, S3A committer는 `committer` 필드가 든 JSON을 남긴다. 광고 리포트 배치의 reader는 `s3a://` 경로를 나열할 때 이름이 `_`로 시작하는 파일을 건너뛰었다. 이런 marker 파일을 데이터로 읽지 않는 규칙이다.
 
 ## conditional write는 S3에 put-if-absent를 줬다
 
