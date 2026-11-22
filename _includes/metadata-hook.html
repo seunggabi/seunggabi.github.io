@@ -519,6 +519,7 @@
           if (!user) return;
           var ref = f.F.doc(f.db, 'users', user.uid);
           var first = true;
+          var reconciled = false;
           sync = {
             set: function (path, on) {
               f.F.setDoc(ref, { reads: on ? f.F.arrayUnion(path) : f.F.arrayRemove(path) }, { merge: true }).catch(function () {});
@@ -564,6 +565,16 @@
             state.merge = false;
             seen = next;
             save();
+            if (!reconciled) {
+              reconciled = true;
+              var CK = 'read-counted-v1-' + user.uid;
+              var counted = false;
+              try { counted = localStorage.getItem(CK) === '1'; } catch (e) {}
+              if (!counted) {
+                seen.forEach(function (p) { if (p.indexOf('/posts/') === 0) countRead(f, user, p, true); });
+                try { localStorage.setItem(CK, '1'); } catch (e) {}
+              }
+            }
             changed();
           }, function () {});
         }
