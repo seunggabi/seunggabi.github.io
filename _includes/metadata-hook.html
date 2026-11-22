@@ -26,9 +26,11 @@
   /* Background music: a button that opens /music/ in a small window so playback survives page changes, plus a one-time nudge. */
   #music-btn {
     position: fixed; left: 1.25rem; bottom: 1.25rem; z-index: 1040;
-    width: 2.75rem; height: 2.75rem; border-radius: 50%; border: 1px solid var(--btn-border-color, rgba(128,128,128,.3));
-    background: var(--card-bg, #fff); color: var(--text-color, #333); box-shadow: 0 2px 8px rgba(0,0,0,.15); cursor: pointer;
+    width: 2.5rem; height: 2.5rem; border-radius: 50%; border: 0;
+    background-color: var(--sidebar-btn-bg, #fff); color: var(--sidebar-btn-color, #8e8e8e);
+    box-shadow: var(--sidebar-border-color, #efefef) 0 0 0 1px, 0 2px 8px rgba(0,0,0,.12); cursor: pointer;
   }
+  #music-btn:hover { background-color: var(--sidebar-hover-bg, #f4f4f4); color: var(--sidebar-active-color, #1d1d1d); }
   #music-nudge {
     position: fixed; left: 1.25rem; bottom: 4.6rem; z-index: 1040; max-width: 15rem;
     padding: .7rem .85rem; border-radius: .6rem; font-size: .85rem; line-height: 1.5;
@@ -37,10 +39,8 @@
   }
   #music-nudge[hidden] { display: none; }
   #music-nudge .actions { margin-top: .5rem; display: flex; gap: .4rem; justify-content: flex-end; }
-  #music-side { display: none; }
   @media all and (min-width: 850px) {
     #music-btn { display: none; }
-    #music-side { display: inline-block; }
     #music-nudge { left: 1rem; bottom: 3.25rem; }
   }
   /* Color chips: tags get a hue from their name, categories from the top-level category. --h is set by the script below. */
@@ -143,15 +143,13 @@
       document.body.appendChild(document.getElementById('music-extra').content.cloneNode(true));
       var sideBottom = document.querySelector('#sidebar .sidebar-bottom');
       if (sideBottom) {
-        var side = document.createElement('button');
-        side.type = 'button';
+        var side = document.createElement('a');
         side.id = 'music-side';
-        side.className = 'btn btn-link nav-link';
+        side.href = '{{ "/music/" | relative_url }}';
         side.setAttribute('aria-label', '배경음악 창 열기');
         side.title = '배경음악: Hans Zimmer - Time';
         side.innerHTML = '<i class="fas fa-music"></i>';
-        var modeGroup = sideBottom.querySelector('.btn-group');
-        if (modeGroup) { modeGroup.after(side); } else { sideBottom.prepend(side); }
+        sideBottom.appendChild(side);
       }
       var nudge = document.getElementById('music-nudge');
       function openMusic() {
@@ -165,7 +163,7 @@
         try { sessionStorage.setItem('music-nudge', '1'); } catch (e) {}
       }
       document.getElementById('music-btn').onclick = function () { hideNudge(); openMusic(); };
-      if (document.getElementById('music-side')) document.getElementById('music-side').onclick = function () { hideNudge(); openMusic(); };
+      if (document.getElementById('music-side')) document.getElementById('music-side').onclick = function (e) { e.preventDefault(); hideNudge(); openMusic(); };
       nudge.querySelector('[data-music="play"]').onclick = function () { hideNudge(); openMusic(); };
       nudge.querySelector('[data-music="close"]').onclick = hideNudge;
       var nudged = false;
