@@ -59,9 +59,17 @@ SQLAlchemy의 relationship 기본 로딩 전략은 `select`, 곧 접근할 때 �
 | 조인으로 한 번에 | 1 | `joinedload()` | `select_related()` | `join fetch`, entity graph(Spring Data의 `@EntityGraph`) |
 | 부모 키를 IN으로 묶어 | 1 + 묶음 수 | `selectinload()` | `prefetch_related()` | `@BatchSize`, `hibernate.default_batch_fetch_size` |
 
-조인 방식은 왕복이 1번이지만 결과가 자식 행 수만큼 나오고 부모 컬럼이 그만큼 반복된다. 캠페인 1,000개에 광고 그룹이 평균 50개면 캠페인 컬럼이 5만 행에 반복돼 돌아온다. 자식 컬렉션 두 개를 함께 조인하면 부모마다 두 컬렉션의 곱만큼 행이 생긴다. Django의 `select_related()`가 외래 키와 일대일 같은 단일 값 관계에만 쓰이는 것도 이 때문이다.
+조인 방식은 왕복이 1번이지만 결과가 자식 행 수만큼 나오고 부모 컬럼이 그만큼 반복된다. 캠페인 1,000개에 광고 그룹이 평균 50개면 캠페인 컬럼이 5만 행에 반복돼 돌아온다. 자식 컬렉션이 둘이면 곱으로 불어나는데, 이 경우는 아래에서 따로 다룬다. Django의 `select_related()`가 외래 키와 일대일 같은 단일 값 관계에만 쓰이는 것도 이 때문이다.
 
 IN 묶음 방식은 부모 쿼리 뒤에 `WHERE campaign_id IN (...)` 쿼리를 따로 보낸다. 행이 불어나지 않고, 자식 컬렉션이 여럿이어도 컬렉션마다 쿼리 하나씩이다. SQLAlchemy `selectinload()`는 부모 키를 최대 500개씩 끊어 보내고, Django `prefetch_related()`는 관계마다 쿼리를 한 번 더 보낸 뒤 파이썬에서 붙인다. 일대다 컬렉션에는 대개 이쪽이 맞고, 다대일·일대일처럼 행마다 붙는 대상이 하나뿐인 관계는 조인이 맞다.
+
+## 컬렉션 두 개를 한 쿼리로 가져오면
+
+캠페인에 광고 그룹(평균 50개)과 키워드(평균 200개) 컬렉션이 함께 있다고 하자. 둘을 한 쿼리에서 조인으로 가져오면 조인 조건이 캠페인 id 하나뿐이라 광고 그룹과 키워드가 모든 조합으로 짝지어진다. 캠페인마다 50 × 200 = 1만 행, 캠페인 1,000개면 1,000만 행이다. 각 조합 행은 서로 다른 값이라 `DISTINCT`를 붙여도 줄지 않는다.
+
+Hibernate는 두 컬렉션이 `List`(bag)로 매핑돼 있으면 이 쿼리를 아예 막는다. `join fetch` 두 개로 한 번에 읽으려 하면 `MultipleBagFetchException: cannot simultaneously fetch multiple bags`가 나고, `List`로 매핑한 `EAGER` `@OneToMany` 두 개도 같은 예외를 낸다. bag은 중복을 허용하므로 조인 곱으로 생긴 중복과 원래 있던 중복을 구분할 수 없기 때문이다. 매핑을 `Set`으로 바꾸면 예외는 사라지지만 SQL이 만드는 1,000만 행은 그대로다.
+
+해법은 컬렉션 하나씩 나눠 읽는 것이다. 첫 쿼리에서 캠페인과 광고 그룹을 `join fetch`로 읽고, 같은 영속성 컨텍스트에서 두 번째 쿼리로 같은 캠페인의 키워드를 `join fetch`하면 이미 읽은 캠페인 객체에 키워드가 채워진다. 돌아오는 행은 5만 + 20만이다. 키워드 쪽을 `@BatchSize`나 `hibernate.default_batch_fetch_size`의 IN 묶음 로딩에 맡겨도 된다. SQLAlchemy라면 컬렉션마다 `selectinload()`를, Django라면 `prefetch_related()`를 써서 컬렉션마다 쿼리를 따로 보낸다.
 
 ## 컬렉션 조인에 LIMIT을 걸면 조인된 행이 잘린다
 
