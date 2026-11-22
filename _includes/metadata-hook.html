@@ -37,6 +37,9 @@
     background: color-mix(in srgb, var(--text-muted-color, #6c757d) 14%, transparent);
   }
   .read-progress { position: fixed; top: 0; left: 0; height: 3px; width: 0; background: var(--link-color, #2a7ae2); z-index: 1100; pointer-events: none; transition: width .08s linear; }
+  .later-toggle { margin: .75rem 0 .75rem .5rem; }
+  .later-remove { border: 0; background: none; padding: 0; font-size: inherit; color: var(--link-color, #2a7ae2); cursor: pointer; }
+  .later-remove:hover { text-decoration: underline; }
   .popular-list { padding-left: 1.6rem; }
   .popular-list li { padding: .55rem 0; border-bottom: 1px solid var(--main-border-color, rgba(128,128,128,.2)); }
   .popular-list li::marker { font-weight: 600; color: var(--text-muted-color, #6c757d); }
@@ -170,11 +173,23 @@
     var KEY = 'read-marks';
     var TAG_ORDER = {{ tag_names | jsonify }};
     var FB = {{ site.firebase | jsonify }};
-    var POSTS = [{% if page.layout == 'home' or page.layout == 'post' or page.url == '/popular/' %}{% for p in site.posts %}[{{ p.url | jsonify }},{{ p.title | jsonify }},{{ p.date | date: '%Y/%m/%d' | jsonify }}]{% unless forloop.last %},{% endunless %}{% endfor %}{% endif %}];
+    var POSTS = [{% if page.layout == 'home' or page.layout == 'post' or page.url == '/popular/' or page.url == '/later/' %}{% for p in site.posts %}[{{ p.url | jsonify }},{{ p.title | jsonify }},{{ p.date | date: '%Y/%m/%d' | jsonify }}]{% unless forloop.last %},{% endunless %}{% endfor %}{% endif %}];
     var seen;
     try { seen = new Set(JSON.parse(localStorage.getItem(KEY) || '[]')); } catch (e) { return; }
+    var LATER_KEY = 'later-marks';
+    var later;
+    try { later = new Set(JSON.parse(localStorage.getItem(LATER_KEY) || '[]')); } catch (e) { later = new Set(); }
     var listeners = [];
     var sync = null;
+    function saveLater() {
+      try { localStorage.setItem(LATER_KEY, JSON.stringify(Array.from(later))); } catch (e) {}
+    }
+    function setLater(path, on) {
+      if (on) { later.add(path); } else { later.delete(path); }
+      saveLater();
+      changed();
+      if (sync) sync.later(path, on);
+    }
     function save() {
       try { localStorage.setItem(KEY, JSON.stringify(Array.from(seen))); } catch (e) {}
     }
@@ -385,11 +400,57 @@
       }
       window.addEventListener('scroll', updateBar, { passive: true });
       updateBar();
+      var laterBtn = document.createElement('button');
+      laterBtn.type = 'button';
+      laterBtn.onclick = function () { setLater(here, !later.has(here)); };
+      if (buttons[0]) buttons[0].after(laterBtn);
+      function renderLater() {
+        var on = later.has(here);
+        laterBtn.innerHTML = on ? '<i class="fa-solid fa-bookmark"></i><span>나중에 읽기 저장됨</span>' : '<i class="fa-regular fa-bookmark"></i><span>나중에 읽기</span>';
+        laterBtn.className = 'later-toggle ux-pill' + (on ? ' is-on' : '');
+        laterBtn.setAttribute('aria-pressed', on);
+      }
+      listeners.push(renderLater);
+      renderLater();
       statsEl = document.createElement('div');
       statsEl.className = 'post-stats';
       statsEl.hidden = true;
-      if (buttons[0]) buttons[0].after(statsEl);
+      laterBtn.after(statsEl);
       {% endif %}
+      var laterBox = document.getElementById('later-list');
+      if (laterBox) {
+        var titleOf = {};
+        POSTS.forEach(function (p) { titleOf[p[0]] = p; });
+        var renderLaterList = function () {
+          laterBox.textContent = '';
+          var items = Array.from(later).filter(function (u) { return titleOf[u]; });
+          if (!items.length) { laterBox.textContent = '저장한 글이 없습니다. 글에서 "나중에 읽기"를 눌러 보세요.'; return; }
+          var ol = document.createElement('ol');
+          ol.className = 'popular-list';
+          items.forEach(function (u) {
+            var p = titleOf[u];
+            var li = document.createElement('li');
+            var a = document.createElement('a');
+            a.href = p[0];
+            a.textContent = p[1];
+            var meta = document.createElement('span');
+            meta.className = 'popular-meta';
+            meta.textContent = p[2] + (seen.has(u) ? ' · 읽음' : '') + ' · ';
+            var rm = document.createElement('button');
+            rm.type = 'button';
+            rm.className = 'later-remove';
+            rm.textContent = '목록에서 제거';
+            rm.onclick = function () { setLater(u, false); };
+            meta.appendChild(rm);
+            li.appendChild(a);
+            li.appendChild(meta);
+            ol.appendChild(li);
+          });
+          laterBox.appendChild(ol);
+        };
+        listeners.push(renderLaterList);
+        renderLaterList();
+      }
       if (/^\s*\|/.test(document.title)) {
         var heading = document.querySelector('h1');
         if (heading && heading.textContent.trim()) document.title = heading.textContent.trim() + ' | ' + {{ site.title | jsonify }};
@@ -463,6 +524,9 @@
               f.F.setDoc(ref, { reads: on ? f.F.arrayUnion(path) : f.F.arrayRemove(path) }, { merge: true }).catch(function () {});
               countRead(f, user, path, on);
             },
+            later: function (path, on) {
+              f.F.setDoc(ref, { later: on ? f.F.arrayUnion(path) : f.F.arrayRemove(path) }, { merge: true }).catch(function () {});
+            },
             theme: function (mode) {
               if (mode === remoteTheme) return;
               remoteTheme = mode;
@@ -486,6 +550,16 @@
             } else if (first) {
               sync.theme(localTheme());
             }
+            var nextLater = new Set((snap.exists() && snap.data().later) || []);
+            if (first && state.merge) {
+              var extraLater = [];
+              later.forEach(function (p) { if (!nextLater.has(p)) { nextLater.add(p); extraLater.push(p); } });
+              if (extraLater.length) {
+                f.F.setDoc(ref, { later: f.F.arrayUnion.apply(null, extraLater) }, { merge: true }).catch(function () {});
+              }
+            }
+            later = nextLater;
+            saveLater();
             first = false;
             state.merge = false;
             seen = next;
