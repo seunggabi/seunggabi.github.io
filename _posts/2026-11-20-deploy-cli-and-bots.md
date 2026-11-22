@@ -4,6 +4,7 @@ title: "Jenkins 배포 CLI, 알림 봇, 마일스톤 스크립트를 파이썬�
 date: 2026-11-20 04:23:00 +0900
 categories: [AI & Tooling, Automation]
 tags: [python, jenkins, flask, github-enterprise, automation, notification]
+description: "여러 프로젝트와 환경에 배포하는 Jenkins CLI, 여러 메신저로 보내는 알림 봇, 주간 마일스톤 스크립트를 파이썬으로 만든 경험을 적었다."
 mermaid: true
 ---
 

@@ -3,6 +3,7 @@ title: "고를 수 없는 선택지를 보여 주던 Superset API 키 화면"
 date: 2026-11-20 03:15:00 +0900
 categories: [BI & Serving, Superset]
 tags: [open-source, superset, mcp, rbac, code-review]
+description: "Superset의 API 키 생성 화면이 비관리자가 고를 수 없는 권한 범위까지 보여 주고, 발급자 권한을 넘는 범위를 고르면 HTTP 500이 나던 문제를 다룬 PR 45272를 정리한다."
 image:
   path: /assets/img/posts/superset-api-key-scopes/pr.webp
   alt: apache/superset PR 45272 화면

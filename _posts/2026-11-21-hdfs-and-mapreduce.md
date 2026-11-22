@@ -3,6 +3,7 @@ title: "HDFS와 MapReduce는 데이터 옆에서 계산하려고 만들어졌다
 date: 2026-11-21 06:01:00 +0900
 categories: [Lakehouse & Storage, HDFS]
 tags: [hdfs, namenode, mapreduce, erasure-coding, s3, concept]
+description: "HDFS의 장점과 한계가 NameNode 메모리에 파일과 블록 정보가 모두 올라가는 구조에서 나온다는 점을 중심으로 HDFS와 MapReduce를 설명한다."
 mermaid: true
 ---
 

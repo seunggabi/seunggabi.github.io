@@ -3,6 +3,7 @@ title: "YARN 컨테이너는 왜 Spark executor 힙보다 크게 잡힐까"
 date: 2026-11-20 05:04:00 +0900
 categories: [Batch & Query, Spark]
 tags: [spark, yarn, hadoop, emr, dynamic-allocation, concept]
+description: "executor-memory 4g로 띄웠는데 YARN 컨테이너는 5GB로 잡히고 가끔 물리 메모리 초과로 죽는 이유를 Spark가 YARN에 컨테이너 크기를 요청하는 방식으로 설명한다."
 ---
 
 `--executor-memory 4g`로 띄운 잡인데 ResourceManager 화면에서는 executor 컨테이너 하나가 5GB로 잡혀 있다. 같은 잡이 어떤 날은 `Container killed by YARN for exceeding physical memory limits`로 executor를 잃는다. 둘 다 Spark가 YARN에 컨테이너를 어떤 크기로 요청하고, YARN이 그 요청을 어떻게 고치는지에서 나온다.

@@ -3,6 +3,7 @@ title: "Flink CDC가 잠금 없이 스냅샷과 binlog를 잇는 방법"
 date: 2026-11-21 03:46:00 +0900
 categories: [Ingestion & CDC, Debezium]
 tags: [flink-cdc, flink, cdc, mysql, debezium, iceberg, kafka-connect, concept]
+description: "Flink CDC가 MySQL 초기 적재 중에도 쌓이는 binlog를 청크 단위 incremental snapshot과 체크포인트로 합치고 복구하는 방식을 설명한다."
 mermaid: true
 ---
 

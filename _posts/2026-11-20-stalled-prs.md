@@ -4,6 +4,7 @@ title: "닫힌 PR 네 개와 3년 넘게 열린 PR 하나"
 date: 2026-11-20 03:40:00 +0900
 categories: [Career, Open Source]
 tags: [open-source, docker-compose, yaml, aws-cli, mariadb4j]
+description: "Compose, MariaDB4j, aws-cli 등에 보냈지만 머지되지 않은 PR들을 모아, 닫힌 이유와 3년 넘게 열려 있는 PR의 사정을 정리한다."
 ---
 
 Airflow에 보낸 PR 이야기에 이어, 다른 저장소에서 머지되지 않은 PR들을 모았다. 닫힌 이유가 저마다 다르다.

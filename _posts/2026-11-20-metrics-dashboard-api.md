@@ -3,6 +3,7 @@ title: "지표 테이블 수십 개를 같은 모양의 읽기 전용 API로 열
 date: 2026-11-20 05:02:00 +0900
 categories: [BI & Serving, Django]
 tags: [django, django-rest-framework, celery, vue, echarts, uwsgi, nginx, monitoring]
+description: "배치가 MySQL에 넣는 수십 개 지표 테이블을 날짜 범위, 서비스, 플랫폼별로 보여 주는 대시보드의 DRF 백엔드와 Vue 프론트, 모니터링과 배포를 정리한다."
 mermaid: true
 ---
 

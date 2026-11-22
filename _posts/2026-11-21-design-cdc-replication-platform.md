@@ -3,6 +3,7 @@ title: "운영 DB 수백 테이블을 Iceberg로 복제하는 CDC 플랫폼 설�
 date: 2026-11-21 06:30:00 +0900
 categories: [System Design, CDC]
 tags: [cdc, debezium, iceberg, kafka-connect, schema-registry, postgresql, system-design]
+description: "여러 팀의 운영 DB 테이블 수백 개를 설정 파일 하나로 추가해 몇 분 지연으로 Iceberg에 복제하는 Debezium 기반 CDC 플랫폼의 요구사항과 설계를 다룬다."
 mermaid: true
 ---
 

@@ -3,6 +3,7 @@ title: "결제·이체·출금을 함께 보는 실시간 이상 거래 탐지 �
 date: 2026-11-21 14:00:00 +0900
 categories: [System Design, Real-time Analytics]
 tags: [fraud-detection, flink, kafka, redis, broadcast-state, streaming, system-design]
+description: "100ms 안에 끝나는 승인 경로와 계정 단위 이벤트 순서 분석을 결합하고, 재배포 없이 규칙을 바꾸는 실시간 이상 거래 탐지 구조를 설계한다."
 mermaid: true
 ---
 

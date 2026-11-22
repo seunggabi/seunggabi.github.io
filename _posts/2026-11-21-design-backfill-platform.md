@@ -3,6 +3,7 @@ title: "180일치를 다시 계산하는 백필 플랫폼 설계"
 date: 2026-11-21 06:32:00 +0900
 categories: [System Design, Orchestration]
 tags: [backfill, airflow, iceberg, lineage, reprocessing, system-design]
+description: "일 배치 버그를 고친 뒤 180일치와 하류 테이블 전부를 다시 계산하면서 일 배치 완료 시각을 지키고 결과를 한 번에 게시하는 백필 플랫폼 설계를 다룬다."
 mermaid: true
 ---
 

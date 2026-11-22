@@ -3,6 +3,7 @@ title: "연말 결산 화면을 Spark SQL 잡 18개와 HBase 한 행으로 만�
 date: 2026-11-20 04:24:00 +0900
 categories: [Batch & Query, Spark]
 tags: [spark, spark-sql, hive, hbase, java, window-function]
+description: "연말 결산 화면을 빠르게 열기 위해 1년 치 재생 로그를 Spark SQL 잡 18개로 미리 집계하고 사용자 ID를 행 키로 HBase 한 행에 담은 구조를 정리한다."
 mermaid: true
 ---
 

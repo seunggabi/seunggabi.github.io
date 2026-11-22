@@ -3,6 +3,7 @@ title: "Kafka 복제는 브로커 몇 대가 죽을 때까지 버틸까"
 date: 2026-11-21 05:12:00 +0900
 categories: [Streaming, Kafka]
 tags: [kafka, replication, isr, high-watermark, kraft, concept]
+description: "replication.factor 3, min.insync.replicas 2 환경에서 ISR, high watermark, acks 조합이 브로커 장애 시 읽기는 유지하고 쓰기는 멈추는 과정을 정리한다."
 ---
 
 `replication.factor=3`, `min.insync.replicas=2`인 토픽에서 브로커 두 대를 연달아 재시작했다. `acks=all` 프로듀서는 이런 에러를 내며 재시도하는데, 같은 파티션을 읽는 컨슈머는 멀쩡히 돈다.

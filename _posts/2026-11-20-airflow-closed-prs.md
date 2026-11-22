@@ -4,6 +4,7 @@ title: "Airflow에 PR 다섯 개를 보냈고 하나가 머지됐다"
 date: 2026-11-20 02:00:00 +0900
 categories: [Career, Open Source]
 tags: [open-source, airflow, code-review]
+description: "2022년 8월부터 2023년 8월까지 Apache Airflow에 보낸 PR 다섯 개 중 머지된 것은 TableauOperator 하나뿐이고 나머지 넷은 닫힌 과정을 돌아본다."
 image:
   path: /assets/img/posts/airflow-closed-prs/pr.webp
   alt: apache/airflow PR 25700 화면

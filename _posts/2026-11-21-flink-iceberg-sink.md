@@ -3,6 +3,7 @@ title: "Flink가 Iceberg에 쓴 파일은 체크포인트가 끝나야 보인다
 date: 2026-11-21 03:50:00 +0900
 categories: [Lakehouse & Storage, Iceberg]
 tags: [iceberg, flink, checkpoint, upsert, kafka-connect, cdc, concept]
+description: "Flink Iceberg sink에서 writer가 쓴 파일이 체크포인트 뒤 committer 커밋으로 테이블에 보이는 과정과 Kafka Connect sink와의 차이를 설명한다."
 mermaid: true
 ---
 

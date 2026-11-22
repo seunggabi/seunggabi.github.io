@@ -3,6 +3,7 @@ title: "NULL 하나가 SQL 결과를 조용히 바꾸는 곳들"
 date: 2026-11-21 06:11:00 +0900
 categories: [Batch & Query, SQL]
 tags: [sql, null, spark, trino, postgresql, mysql, sqlite, concept]
+description: "NOT IN은 NULL이 한 행만 있어도 빈 결과를 내고 <> 조건은 NULL 행을 함께 뺀다. 3값 논리가 SQL 결과를 조용히 바꾸는 지점을 여러 엔진 기준으로 정리한다."
 ---
 
 `WHERE status <> 'refunded'`는 환불 주문만 빼는 것처럼 보이지만 `status`가 NULL인 주문도 함께 뺀다. `WHERE id NOT IN (SELECT user_id FROM orders)`는 `user_id`에 NULL이 한 행만 있어도 빈 결과를 낸다. 두 쿼리 모두 에러 없이 끝난다. SQL은 NULL과의 비교를 참도 거짓도 아닌 UNKNOWN으로 두고, 절마다 UNKNOWN을 다르게 다룬다.

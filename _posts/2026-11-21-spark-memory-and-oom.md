@@ -3,6 +3,7 @@ title: "Spark OOM은 누가 프로세스를 죽였는지부터 읽는다"
 date: 2026-11-21 05:11:00 +0900
 categories: [Batch & Query, Spark]
 tags: [spark, memory, oom, yarn, pyspark, concept]
+description: "Spark OOM은 JVM이 힙을 못 구한 경우와 YARN이나 Kubernetes가 컨테이너 한도 초과로 프로세스를 죽인 경우로 갈린다. 힙 구성과 먼저 터지는 지점을 짚는다."
 ---
 
 Spark 잡이 메모리 때문에 죽었다는 로그는 크게 두 갈래다. 하나는 JVM이 힙을 못 구해 `java.lang.OutOfMemoryError`를 던진 경우이고, 다른 하나는 JVM은 멀쩡한데 YARN이나 Kubernetes가 컨테이너 한도를 넘었다고 프로세스를 죽인 경우다. 두 경우는 고칠 설정이 다르다. 힙을 늘려야 할 때 overhead를 늘리거나, 반대로 하면 비용만 늘고 잡은 또 죽는다.

@@ -3,6 +3,7 @@ title: "CDC·스트리밍·레이크하우스 데이터 플랫폼의 전체 구�
 date: 2026-11-21 04:30:00 +0900
 categories: [Lakehouse & Storage, Iceberg]
 tags: [architecture, cdc, iceberg, kafka, flink, airflow]
+description: "운영 DB를 직접 읽지 않고 CDC와 앱 이벤트를 Kafka와 Iceberg 레이크에 쌓아 분석하는 데이터 플랫폼의 전체 구조를 구성 요소별로 개괄한다."
 mermaid: true
 ---
 

@@ -3,6 +3,7 @@ title: "고유 사용자 수를 근사로 세고 스케치로 합치기"
 date: 2026-11-21 05:25:00 +0900
 categories: [Batch & Query, SQL]
 tags: [hyperloglog, datasketches, trino, spark, athena, concept]
+description: "일간 고유 사용자 수를 더해도 주간 값이 되지 않는 이유와, HyperLogLog 스케치로 고유 수를 근사해 합치는 방법을 Trino, Spark, Athena 기준으로 설명한다."
 ---
 
 일간 고유 사용자 수 7개를 더하면 주간 고유 사용자 수가 되지 않는다. 그래서 주간 값은 원천 로그를 7일치 다시 읽어 `COUNT(DISTINCT user_id)`로 세는데, 이 집계는 사용자 ID를 전부 모아 중복을 지워야 끝난다. 월간, 분기, 플랫폼별로 축이 늘 때마다 원천을 다시 읽는다. 오차 1~2%를 받아들이면 하루마다 몇 KB짜리 스케치를 저장해 두고, 주간과 월간은 스케치를 합쳐서 낼 수 있다.

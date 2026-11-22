@@ -4,6 +4,7 @@ title: "gRPC와 REST를 한 서비스로 열 때 오류와 재시도 규칙 정�
 date: 2026-11-20 05:11:00 +0900
 categories: [Platform & Infra, gRPC]
 tags: [grpc, rest, protobuf, http2, retry, concept]
+description: "같은 로직을 gRPC와 REST로 함께 열 때 클라이언트가 받는 오류 형태가 달라지는 점을 짚고, 오류 매핑과 재시도 규칙을 정하는 방법을 다룬다."
 ---
 
 같은 광고 결정 로직을 gRPC로도 부르고 REST로도 부르면, 로직은 하나여도 호출하는 쪽이 받는 실패는 둘이다. REST 클라이언트는 4xx와 5xx를 보고, gRPC 클라이언트는 HTTP 200 응답의 트레일러에 담긴 `INVALID_ARGUMENT`나 `UNAVAILABLE`을 보며, 프록시가 `grpc-status` 없이 만든 HTTP 400은 `INTERNAL`로 받는다. 한 서비스가 두 입구를 같은 애플리케이션 서비스 위에 열 때 생기는 일이다.

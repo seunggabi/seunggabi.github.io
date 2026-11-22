@@ -3,6 +3,7 @@ title: "DataHub로 보는 데이터 카탈로그와 리니지"
 date: 2026-11-21 06:07:00 +0900
 categories: [Data Quality, Data Catalog]
 tags: [datahub, openlineage, lineage, data-catalog, metadata, concept]
+description: "쿼리 엔진의 메타스토어가 답하지 못하는 소유자와 하류 영향 질문을 DataHub 카탈로그와 OpenLineage 리니지로 푸는 방법과 구조를 설명한다."
 mermaid: true
 ---
 

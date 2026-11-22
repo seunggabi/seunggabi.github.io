@@ -3,6 +3,7 @@ title: "Kafka는 세그먼트 단위로 지우고 키 단위로 압축한다"
 date: 2026-11-21 05:13:00 +0900
 categories: [Streaming, Kafka]
 tags: [kafka, log-segment, retention, log-compaction, tiered-storage, concept]
+description: "Kafka가 레코드가 아닌 세그먼트 단위로 보존 기간을 적용하는 이유와, 같은 세그먼트 위에서 키 기준으로 도는 compaction을 설명한다."
 ---
 
 트래픽이 적은 토픽의 `retention.ms`를 1일로 줄였다. 그런데 사흘 전에 들어온 레코드가 컨슈머에서 아직 읽힌다. 설정이 늦게 먹은 것이 아니다. Kafka는 레코드 하나하나에 만료를 걸지 않고, 파티션을 이루는 세그먼트 파일을 통째로 지운다. 세그먼트 안의 가장 새 레코드가 보존 기간을 넘겨야 그 파일이 지워진다.

@@ -3,6 +3,7 @@ title: "Structured Streaming은 Kafka 오프셋을 어디 둘까"
 date: 2026-11-20 04:53:00 +0900
 categories: [Streaming, Spark Streaming]
 tags: [spark-streaming, structured-streaming, kafka, checkpoint, watermark, concept]
+description: "Spark Streaming(DStream)과 Structured Streaming이 Kafka 오프셋을 어디에 기억하고 출력이 몇 번 쓰이는지 어떻게 다른지 비교한다."
 ---
 
 Spark에는 스트리밍 API가 두 개 있다. RDD 위에서 도는 Spark Streaming(DStream)과 DataFrame 위에서 도는 Structured Streaming이다. 둘 다 마이크로배치로 돌지만, Kafka를 어디까지 읽었는지 기억하는 곳과 출력이 몇 번 쓰이는지가 다르다. [Spark Streaming으로 Hive에 쌓는 글](/posts/spark-streaming-to-hive/)의 DStream 잡을 예로 두고, 그 잡을 Structured Streaming으로 옮긴다고 가정해 무엇을 얻고 무엇을 내주는지 정리한다. 실제로 옮긴 잡은 아니고, 아래의 전환은 모두 가정이다. 버전은 Spark 4.3 기준이다.

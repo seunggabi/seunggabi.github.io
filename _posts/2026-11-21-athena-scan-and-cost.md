@@ -3,6 +3,7 @@ title: "Athena 쿼리 비용은 어디서 정해질까"
 date: 2026-11-21 03:14:00 +0900
 categories: [Batch & Query, Trino·Athena]
 tags: [athena, trino, partitioning, iceberg, parquet, cost, concept]
+description: "Athena 요금이 쿼리 시간이 아니라 S3에서 읽은 바이트로 정해지는 구조와, WHERE 절, 파일 포맷, 테이블 포맷이 스캔량과 비용에 미치는 영향을 설명한다."
 ---
 
 Athena SQL의 기본 요금은 쿼리가 돈 시간이 아니라 S3에서 읽은 바이트로 매겨진다. 그래서 같은 결과를 내는 두 쿼리라도 WHERE 절 모양, 파일 포맷, 테이블 포맷에 따라 청구 금액이 달라진다. `LIMIT 10`을 붙여도 읽는 양이 줄지 않는 경우가 많다.

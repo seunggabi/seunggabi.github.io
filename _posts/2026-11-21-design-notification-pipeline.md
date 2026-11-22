@@ -3,6 +3,7 @@ title: "주문 알림과 9시 캠페인을 함께 보내는 알림 파이프라�
 date: 2026-11-21 06:35:00 +0900
 categories: [System Design, Messaging]
 tags: [notification, push, kafka, sqs, rate-limiting, idempotency, system-design]
+description: "OTP 같은 트랜잭션 알림과 오전 9시 대규모 캠페인을 분리해 같은 쿼터를 나눠 쓰면서도 지연과 중복 발송을 막는 알림 파이프라인 설계를 다룬다."
 mermaid: true
 ---
 

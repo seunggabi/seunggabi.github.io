@@ -3,6 +3,7 @@ title: "AWS 데이터 플랫폼 비용은 어디서 새는가"
 date: 2026-11-21 03:26:00 +0900
 categories: [Platform & Infra, AWS]
 tags: [aws, emr, aws-msk, s3, athena, s3-tables, cost, concept]
+description: "EMR, MSK, S3, Athena, 데이터 전송 다섯 줄로 나뉘는 AWS 데이터 플랫폼 청구서에서 서비스별 과금 단위와 비용이 새는 곳, 줄이는 손잡이를 정리한다."
 ---
 
 데이터 플랫폼 청구서는 대개 EMR, MSK, S3, Athena, 데이터 전송 다섯 줄로 갈린다. 줄마다 과금 단위가 다르고, 새는 곳도 다르다. EMR은 일이 끝난 뒤에도 켜져 있는 시간에서, MSK는 한 번 늘리면 줄일 수 없는 디스크에서, S3는 작은 파일과 지워지지 않은 버전에서 샌다. 단가를 깎는 것보다 과금되는 양과 시간을 줄이는 쪽이 대개 효과가 크다.

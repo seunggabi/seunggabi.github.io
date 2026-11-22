@@ -3,6 +3,7 @@ title: "같은 Hive 테이블을 엔진마다 다르게 읽는 지점"
 date: 2026-11-21 05:15:00 +0900
 categories: [Lakehouse & Storage, Hive]
 tags: [hive, hive-metastore, serde, orc, bucketing, acid, spark, trino, concept]
+description: "Hive 메타스토어의 테이블 종류, SerDe, 버킷, transactional 속성을 엔진마다 다르게 해석해 생기는 DROP, 버킷, ACID 문제를 설명한다."
 ---
 
 외부 테이블인 줄 알고 `DROP TABLE`을 돌렸는데 데이터 디렉터리까지 사라진다. Spark로 버킷 테이블을 만들었는데 Hive와 Trino는 그 버킷을 쓰지 못한다. Hive에서 `UPDATE`한 테이블을 Spark로 읽을 방법이 마땅치 않다. 세 문제는 같은 곳에서 나온다. 메타스토어의 테이블 항목에는 컬럼과 파티션 말고도 테이블 종류, SerDe와 InputFormat, 버킷 정의, `transactional` 속성이 들어 있고, 이 값을 해석하는 일은 읽고 쓰는 엔진마다 따로 한다.

@@ -3,6 +3,7 @@ title: "Airflow TableauOperator에 template_fields 넣기"
 date: 2026-11-20 01:30:00 +0900
 categories: [Orchestration, Airflow]
 tags: [open-source, airflow, tableau, jinja]
+description: "Airflow TableauOperator에 template_fields를 추가해 DAG params로 대상 워크북을 넘길 수 있게 한 PR의 배경과 변경 내용을 다룬다."
 image:
   path: /assets/img/posts/airflow-tableau-template-fields/pr.webp
   alt: apache/airflow PR 29360 머지 화면

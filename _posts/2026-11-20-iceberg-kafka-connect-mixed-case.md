@@ -3,6 +3,7 @@ title: "Iceberg Kafka Connect가 대소문자 섞인 테이블에서 NPE로 죽�
 date: 2026-11-20 01:00:00 +0900
 categories: [Ingestion & CDC, Kafka Connect]
 tags: [open-source, iceberg, kafka-connect, cdc, java]
+description: "대문자가 섞인 테이블 이름 때문에 Iceberg Kafka Connect 싱크 태스크가 NullPointerException으로 죽던 문제와 이를 고친 PR을 설명한다."
 mermaid: true
 image:
   path: /assets/img/posts/iceberg-kafka-connect-mixed-case/pr.webp

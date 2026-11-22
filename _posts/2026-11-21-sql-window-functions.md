@@ -3,6 +3,7 @@ title: "윈도 함수의 기본 프레임은 동점에서 어긋난다"
 date: 2026-11-21 05:29:00 +0900
 categories: [Batch & Query, SQL]
 tags: [sql, window-functions, trino, spark, sqlite, concept]
+description: "윈도 함수에 프레임을 적지 않으면 기본 프레임이 적용되어 동점 행에서 누적값과 LAST_VALUE가 어긋난다. ROWS, RANGE, GROUPS의 차이와 엔진별 동작을 비교한다."
 ---
 
 날짜순 누적 매출을 `SUM(amount) OVER (ORDER BY day)`로 구하면 같은 날짜의 두 행이 같은 누적값을 받는다. 같은 창에서 `LAST_VALUE(amount)`를 부르면 파티션의 마지막 값 대신 현재 행의 값이 나온다. 둘 다 프레임을 적지 않았을 때 붙는 기본 프레임대로 계산한 결과다. 윈도 함수는 `PARTITION BY`, `ORDER BY`, 프레임 세 가지를 따로 읽어야 결과를 예측할 수 있다.

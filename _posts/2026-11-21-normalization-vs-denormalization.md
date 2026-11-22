@@ -3,6 +3,7 @@ title: "테이블은 언제 나누고 언제 합칠까"
 date: 2026-11-21 05:24:00 +0900
 categories: [Transformation & Modeling, Data Modeling]
 tags: [data-modeling, normalization, kimball, star-schema, spark, iceberg, parquet, concept]
+description: "고객 도시 같은 값이 주문 행마다 중복되면 갱신 이상이 생긴다. 정규화로 테이블을 나누는 기준과, 분석에서 스타 스키마나 OBT로 다시 합치는 기준을 정리한다."
 ---
 
 주문 상세 테이블의 모든 행에 고객의 도시가 들어 있다고 하자. 고객이 이사하면 그 고객의 주문 행을 전부 고쳐야 하고, 일부만 고치면 같은 고객이 두 도시에 사는 것처럼 보인다. 반대로 도시를 고객 테이블에만 두면 분석 쿼리마다 수억 행짜리 주문과 고객을 조인한다. 어느 쪽을 고를지는 데이터를 얼마나 자주 고치는지, 어떤 모양으로 읽는지에 달려 있다.

@@ -3,6 +3,7 @@ title: "PySpark UDF는 왜 느리고 Arrow는 무엇을 바꾸나"
 date: 2026-11-21 06:16:00 +0900
 categories: [Batch & Query, Spark]
 tags: [pyspark, spark, arrow, udf, pandas-udf, concept]
+description: "PySpark의 pickled UDF는 행마다 JVM과 Python 워커 사이를 오가서 느리다. Arrow 레코드 배치와 pandas UDF가 이 전송 비용을 어떻게 줄이는지 설명한다."
 mermaid: true
 ---
 

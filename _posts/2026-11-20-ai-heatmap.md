@@ -4,6 +4,7 @@ title: "AI 사용 비용 잔디를 만들다 보니 작은 ETL이 됐다"
 date: 2026-11-20 02:50:00 +0900
 categories: [AI & Tooling, Automation]
 tags: [ai-heatmap, claude-code, ccusage, etl, github-actions]
+description: "하루하루 쓴 AI 비용을 GitHub 잔디처럼 칠한 ai-heatmap을 만들다 보니, 데이터를 모으고 합치는 작은 ETL이 된 과정을 정리한다."
 mermaid: true
 image:
   path: /assets/img/posts/ai-heatmap/heatmap.svg

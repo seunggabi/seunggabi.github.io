@@ -3,6 +3,7 @@ title: "Kafka로 여러 인스턴스의 캐시를 원천 DB에 맞추는 설계"
 date: 2026-11-21 06:29:00 +0900
 categories: [System Design, Caching]
 tags: [cache-invalidation, kafka, debezium, cdc, redis, system-design]
+description: "읽기 인스턴스 100대의 Redis와 메모리 캐시를 원천 DB 변경에 몇 초 안에 맞추기 위해 Debezium CDC와 Kafka로 캐시를 갱신하고 무효화하는 설계를 다룬다."
 mermaid: true
 ---
 

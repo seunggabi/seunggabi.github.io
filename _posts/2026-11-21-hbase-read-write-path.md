@@ -3,6 +3,7 @@ title: "HBase의 쓰기와 읽기는 어떤 길을 지나가나"
 date: 2026-11-21 05:02:00 +0900
 categories: [Lakehouse & Storage, HBase]
 tags: [hbase, wal, memstore, compaction, regionserver, zookeeper, concept]
+description: "HBase Put 성공 직후 데이터가 WAL과 메모리에만 있는 이유와, RegionServer 장애 복구 및 읽기 경로, compaction 동작을 설명한다."
 mermaid: true
 ---
 

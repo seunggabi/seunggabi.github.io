@@ -3,6 +3,7 @@ title: "데이터 레이크의 권한은 어디서 집행되는가"
 date: 2026-11-21 06:08:00 +0900
 categories: [Data Quality, Governance]
 tags: [access-control, lake-formation, pii, trino, iceberg, aws, concept]
+description: "데이터 레이크에서 컬럼을 숨겨도 S3 권한이 남으면 소용없는 이유를 짚고, Lake Formation 권한 집행과 개인정보 삭제, 감사 기록을 정리한다."
 ---
 
 Athena에서 분석가에게 주민번호 컬럼을 숨겼는데, 같은 분석가의 IAM 역할에 그 버킷의 `s3:GetObject`가 남아 있다면 숨긴 의미가 없다. Parquet 파일을 받아 열면 컬럼이 다 있다. 고객이 삭제를 요청해 `DELETE`를 돌린 행도 시간 여행 쿼리로는 여전히 보인다. 레이크의 접근 제어와 개인정보 처리는 규칙을 어디에 적느냐보다 누가 그 규칙을 집행하고, 어떤 경로가 그 집행을 건너뛰느냐로 갈린다.

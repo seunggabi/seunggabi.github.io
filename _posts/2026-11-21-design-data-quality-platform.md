@@ -3,6 +3,7 @@ title: "수천 개 테이블을 지키는 데이터 품질 플랫폼 설계"
 date: 2026-11-21 06:31:00 +0900
 categories: [System Design, Data Quality]
 tags: [data-quality, data-observability, write-audit-publish, iceberg, dbt, anomaly-detection, system-design]
+description: "테이블 5,000개 중 1,000개를 매일 아침 지키기 위해 설정 없는 메타데이터 감시와 선언 검사, 나쁜 데이터 사전 차단을 갖춘 데이터 품질 플랫폼 설계를 다룬다."
 mermaid: true
 ---
 

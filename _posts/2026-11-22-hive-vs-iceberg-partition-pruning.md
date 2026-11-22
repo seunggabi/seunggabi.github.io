@@ -3,6 +3,7 @@ title: "Hive 파티션은 디렉터리로, Iceberg는 매니페스트로 파일�
 date: 2026-11-22 16:50:00 +0900
 categories: [Lakehouse & Storage, Iceberg]
 tags: [iceberg, hive, parquet, partition-pruning, metastore, s3, concept]
+description: "같은 쿼리에서 Hive는 파티션 디렉터리를 나열하고 파일 footer를 열어 보지만 Iceberg는 매니페스트로 읽을 파일을 고른다. 두 방식의 파티션 프루닝 차이를 비교한다."
 mermaid: true
 ---
 

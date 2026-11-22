@@ -3,6 +3,7 @@ title: "액션 하나가 Spark에서 task 수백 개가 되기까지"
 date: 2026-11-21 05:10:00 +0900
 categories: [Batch & Query, Spark]
 tags: [spark, spark-sql, catalyst, tungsten, whole-stage-codegen, dag-scheduler, cache, concept]
+description: "action 하나가 호출되면 드라이버가 계획을 세우고 셔플 지점에서 stage로 자른 뒤 파티션 수만큼 task를 만들어 executor에 보내는 Spark 실행 과정을 따라간다."
 mermaid: true
 ---
 

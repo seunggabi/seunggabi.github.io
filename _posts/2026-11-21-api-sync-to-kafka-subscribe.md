@@ -3,6 +3,7 @@ title: "배포할 때마다 끊기던 API 동기화를 Kafka 구독으로 바꾼
 date: 2026-11-21 14:10:00 +0900
 categories: [Streaming, Kafka]
 tags: [kafka, messaging, consumer-group, idempotency, ad-tech, deployment]
+description: "받는 쪽 서버를 배포하는 동안 API 호출로 보낸 변경이 빠지던 동기화 서버를 Kafka 토픽 구독 구조로 바꾼 이유와, 중복 메시지 처리까지 정리한다."
 pin: true
 ---
 

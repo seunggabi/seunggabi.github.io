@@ -3,6 +3,7 @@ title: "Logstash로 Kafka 로그를 TCP 로그 시스템에 넘기기"
 date: 2026-11-20 05:01:00 +0900
 categories: [Ingestion & CDC, Logstash]
 tags: [logstash, kafka, kubernetes]
+description: "Kafka에 쌓인 행동 로그를 TCP로 한 줄씩 받는 사내 로그 시스템에 넘기려고 Logstash를 가운데 두고 JSON을 풀어 형식에 맞춘 과정을 정리한다."
 ---
 
 Kafka에 쌓인 행동 로그를 사내의 다른 로그 시스템에도 보내야 했다. 그쪽은 TCP로 정해진 형식의 한 줄씩 받는 시스템이라, Kafka 메시지를 그대로 넘길 수 없었다. 그래서 가운데에 Logstash를 두고 Kafka 메시지를 읽어 JSON을 풀고, 이벤트 하나를 한 줄 문자열로 바꿔 보냈다. 이전 회사에서 음악·오디오 서비스의 데이터 쪽을 맡으면서 만든 것이다.

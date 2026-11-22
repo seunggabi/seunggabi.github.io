@@ -3,6 +3,7 @@ title: "Kafka 로그를 Spark Streaming으로 HDFS에 쌓고 Hive 테이블로 �
 date: 2026-11-20 04:15:00 +0900
 categories: [Batch & Query, Spark]
 tags: [spark-streaming, kafka, hdfs, hive, orc, small-files]
+description: "수집 API가 Kafka로 보낸 로그를 Spark Streaming으로 HDFS에 쌓고, 일 배치로 중복 제거와 Hive 적재, 작은 파일 합치기, 테이블 점검까지 한 과정을 정리한다."
 mermaid: true
 ---
 

@@ -3,6 +3,7 @@ title: "CSV, Avro, Parquet, ORC는 파일에 무엇을 남기나"
 date: 2026-11-21 06:05:00 +0900
 categories: [Lakehouse & Storage, Parquet]
 tags: [csv, json, avro, parquet, orc, compression, schema-evolution, concept]
+description: "CSV, JSON, Avro, Parquet, ORC가 파일 안에 남기는 레코드 경계, 스키마, 컬럼 통계가 분할, 건너뛰기, 스키마 변경을 어떻게 정하는지 비교한다."
 ---
 
 gzip으로 묶은 CSV 파일 하나는 몇 GB든 Spark 태스크 하나가 처음부터 끝까지 푼다. 같은 데이터를 snappy Avro로 두면 여러 태스크가 나눠 읽고, Parquet으로 두면 필요한 컬럼만 읽는다. 차이는 포맷이 파일 안에 무엇을 남기느냐에서 온다. 레코드 경계 표시, 스키마, 컬럼별 통계와 인덱스가 각각 어느 포맷에 들어 있는지가 분할, 건너뛰기, 스키마 변경을 정한다.

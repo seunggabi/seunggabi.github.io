@@ -3,6 +3,7 @@ title: "Kafka Connect의 워커와 태스크가 나눠 맡는 일"
 date: 2026-11-20 06:02:00 +0900
 categories: [Ingestion & CDC, Kafka Connect]
 tags: [kafka-connect, kafka, msk-connect, debezium, iceberg, schema-registry, exactly-once, concept]
+description: "Kafka Connect에서 워커, 커넥터, 태스크가 맡는 일을 나누고, 커넥터는 RUNNING인데 태스크가 죽은 CDC 파이프라인을 진단하는 법을 정리한다."
 mermaid: true
 ---
 

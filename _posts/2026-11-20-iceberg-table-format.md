@@ -3,6 +3,7 @@ title: "Iceberg가 읽을 파일을 고르는 법과 epoch 파티션 제약"
 date: 2026-11-20 04:43:00 +0900
 categories: [Lakehouse & Storage, Iceberg]
 tags: [iceberg, lakehouse, partitioning, kafka-connect, concept]
+description: "Iceberg가 메타데이터 트리로 읽을 파일을 고르는 방식을 설명하고, BIGINT epoch 컬럼에 day 파티션을 걸 수 없는 제약을 짚는다."
 mermaid: true
 ---
 

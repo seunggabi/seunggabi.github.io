@@ -3,6 +3,7 @@ title: "Iceberg, Delta, Hudi는 커밋을 어디에 적는가"
 date: 2026-11-21 05:01:00 +0900
 categories: [Lakehouse & Storage, Iceberg]
 tags: [iceberg, delta-lake, hudi, hive, lakehouse, catalog, concept]
+description: "Iceberg, Delta Lake, Hudi는 모두 ACID 커밋을 지원하지만 테이블 상태를 적는 위치와 동시 커밋 충돌을 다루는 방식이 다르다. 세 포맷의 메타데이터 구조를 비교한다."
 ---
 
 CDC upsert가 계속 들어오는 테이블을 Iceberg, Delta Lake, Hudi 중 무엇으로 만들어도 ACID 커밋과 시간 여행은 된다. 세 포맷이 갈리는 지점은 "지금 이 테이블을 이루는 파일은 무엇인가"를 어디에 적는지, 그리고 두 커밋이 부딪힐 때 누가 판정하는지다. 행 단위 변경 비용, 파티션을 바꾸는 방법, 붙일 수 있는 엔진이 모두 이 선택을 따라간다.

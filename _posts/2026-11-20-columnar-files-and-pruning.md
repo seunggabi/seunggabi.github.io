@@ -3,6 +3,7 @@ title: "컬럼에 함수를 씌우면 왜 Parquet·ORC가 건너뛰지 못할까
 date: 2026-11-20 04:42:00 +0900
 categories: [Lakehouse & Storage, Parquet]
 tags: [concept, parquet, orc, predicate-pushdown, partitioning, small-files, athena, spark]
+description: "같은 테이블과 기간을 조회해도 컬럼에 함수를 씌우면 Parquet와 ORC가 건너뛰지 못하는 이유를 파티션, 통계, 푸시다운 단계별로 설명한다."
 mermaid: true
 ---
 

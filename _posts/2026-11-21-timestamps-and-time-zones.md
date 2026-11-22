@@ -3,6 +3,7 @@ title: "KST 날짜 파티션이 9시간 밀리는 타임스탬프 타입"
 date: 2026-11-21 06:12:00 +0900
 categories: [Batch & Query, SQL]
 tags: [timestamp, timezone, spark, trino, parquet, iceberg, hive, athena, mysql, debezium, concept]
+description: "MySQL DATETIME의 한국 시각을 UTC로 읽어 Iceberg timestamptz에 쌓으면 KST 날짜 파티션이 9시간 밀린다. 엔진과 포맷별 타임스탬프 타입의 차이를 정리한다."
 ---
 
 애플리케이션이 MySQL `DATETIME` 컬럼에 한국 시각 `2026-11-21 08:30:00`을 넣는다. Debezium은 이 값을 `1795249800000`으로 내보내는데, 이는 08:30을 UTC로 읽은 epoch 밀리초다. 이 값을 Iceberg `timestamptz`로 쌓고 세션 시간대가 `Asia/Seoul`인 Spark에서 읽으면 17:30이 나온다. 실제 순간인 UTC 11월 20일 23:30을 제대로 쌓은 테이블에서는 UTC 날짜로 자른 파티션 때문에 같은 주문이 전날로 들어간다. 두 오류 모두 9시간짜리이고, 원인은 저장 타입이 "순간"인지 "벽시계"인지를 각 단계가 다르게 가정했다는 데 있다.

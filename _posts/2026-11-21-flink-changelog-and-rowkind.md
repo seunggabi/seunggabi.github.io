@@ -3,6 +3,7 @@ title: "Flink SQL의 UPDATE는 왜 두 줄로 나올까"
 date: 2026-11-21 03:42:00 +0900
 categories: [Streaming, Flink]
 tags: [flink, flink-sql, cdc, debezium, kafka, iceberg, concept]
+description: "Debezium 토픽을 Flink SQL로 읽을 때 행마다 붙는 변경 종류 RowKind와, append 또는 upsert sink가 그것을 받는 방식의 차이를 설명한다."
 ---
 
 Debezium 토픽을 Flink SQL로 읽어 상태별 주문 수를 센다고 하자. 주문 하나가 `PAID`에서 `SHIPPED`로 바뀌면 결과가 네 줄 나온다. `PAID` 개수를 고치는 두 줄과 `SHIPPED` 개수를 고치는 두 줄이다. 이 결과를 append만 하는 sink에 쓰면 상태마다 행이 계속 쌓이고, 키로 덮어쓰는 sink에 쓰면 상태마다 마지막 숫자만 남는다. 어느 쪽이 맞는지는 Flink가 행마다 붙이는 변경 종류와 sink가 그걸 받는 방식에 달려 있다.

@@ -3,6 +3,7 @@ title: "학습과 서빙이 같은 값을 보는 피처 저장소 설계"
 date: 2026-11-21 06:24:00 +0900
 categories: [System Design, ML Data]
 tags: [feature-store, point-in-time-join, training-serving-skew, redis, iceberg, flink, system-design]
+description: "학습은 과거 시점의 피처 값을, 서빙은 10ms 안에 같은 피처를 꺼내야 하는 요구를 두 저장소의 불일치 없이 풀어내는 피처 저장소 설계를 다룬다."
 mermaid: true
 ---
 

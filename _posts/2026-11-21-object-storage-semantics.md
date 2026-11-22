@@ -3,6 +3,7 @@ title: "rename 없는 S3에서 결과를 커밋하는 법"
 date: 2026-11-21 06:15:00 +0900
 categories: [Platform & Infra, AWS]
 tags: [s3, object-storage, s3a, output-committer, multipart-upload, conditional-writes, s3-express, concept]
+description: "S3에는 rename이 없어 Spark 잡의 마지막 커밋 단계가 오래 걸리고 중간에 죽으면 일부 파일만 남는다. 이 차이가 커밋 방식, 요청 설계, 동시 쓰기에 미치는 영향을 따라간다."
 ---
 
 Spark 잡이 S3에 결과 파일 2,000개를 다 쓴 뒤에도 마지막 job commit 단계가 쓰기만큼 오래 걸리기도 한다. 그 사이 잡이 죽으면 출력 경로에는 일부 파일만 옮겨진 상태가 남는다. 파일 시스템에서 메타데이터만 바꾸던 rename이 S3에서는 객체마다 복사와 삭제로 바뀌기 때문이다. S3 위의 파이프라인은 "다 쓰고 한 번에 보이게 한다"를 rename 말고 다른 수단으로 만들어야 한다.

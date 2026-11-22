@@ -3,6 +3,7 @@ title: "HBase 서빙 테이블은 행 키를 어떻게 읽어야 빠를까"
 date: 2026-11-20 04:52:00 +0900
 categories: [Lakehouse & Storage, HBase]
 tags: [hbase, row-key, hotspotting, spark, bulk-load, key-value, concept]
+description: "배치로 미리 계산한 결과를 키 하나로 꺼내는 HBase 서빙 테이블에서, 행 키 설계가 조회 속도와 핫스팟을 어떻게 좌우하는지 Spark 벌크 로드와 함께 설명한다."
 ---
 
 사용자가 화면을 열 때마다 1년 치 로그를 집계하면 응답이 너무 늦다. 그래서 배치가 결과를 미리 계산해 두고, API는 키 하나로 결과를 꺼내기만 하는 구조를 쓴다. 이때 저장소가 빠른지 느린지는 클러스터 크기보다 행 키를 어떻게 만들었고 어떻게 읽느냐에 달려 있다. [연말 결산 Spark 잡 글](/posts/year-end-recap-spark/)이 이 구조였고, 이 글은 그 설계를 예로 HBase 데이터 모델, 행 키, 읽기와 쓰기 방식을 정리한다. 버전은 HBase 2.5 기준이다.

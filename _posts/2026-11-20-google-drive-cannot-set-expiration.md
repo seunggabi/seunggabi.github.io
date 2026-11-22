@@ -4,6 +4,7 @@ title: "웹에서는 되는데 API로는 403: 공유 드라이브 권한 만료�
 date: 2026-11-20 03:20:00 +0900
 categories: [Platform & Infra, Google Workspace]
 tags: [google-drive-api, service-account, permissions, bug-report]
+description: "서비스 계정으로 공유 드라이브 파일에 만료일 있는 권한을 주려 하면 웹에서는 되는데 API는 403을 내는 문제의 원인과 확인 과정을 기록한다."
 mermaid: true
 ---
 

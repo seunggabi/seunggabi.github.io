@@ -3,6 +3,7 @@ title: "스트림 옆 Redis로 중복 거르고 윈도 세기"
 date: 2026-11-21 03:18:00 +0900
 categories: [Streaming, Flink]
 tags: [redis, flink, kafka, deduplication, rate-limiting, concept]
+description: "스트림 처리기 옆 Redis로 중복 클릭을 거르고 윈도 단위로 세는 구조를 다룬다. 키가 만료, 축출, 장애로 사라질 때 판정이 어떻게 틀어지는지 짚는다."
 ---
 
 같은 클릭이 두 번 들어왔는지, 한 IP가 1분 동안 몇 번 눌렀는지를 스트림 처리기 옆의 Redis에 묻는 구조는 흔하다. 붙이기는 쉽다. 어려운 건 Redis의 키가 만료, 메모리 축출, 장애 세 경로로 사라지고, 사라질 때마다 중복 판정과 카운트가 조용히 바뀐다는 점이다.

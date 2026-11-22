@@ -3,6 +3,7 @@ title: "읽기만 해도 원천을 붙잡는 격리 수준과 MVCC"
 date: 2026-11-21 06:03:00 +0900
 categories: [Batch & Query, SQL]
 tags: [isolation-level, mvcc, mysql, innodb, postgresql, debezium, cdc, concept]
+description: "읽기만 하는 긴 추출 트랜잭션이 MVCC에서 옛 버전을 붙잡아 원천을 느리게 만드는 원리와, MySQL과 PostgreSQL의 격리 수준별 동작을 정리한다."
 ---
 
 원천 MySQL에서 큰 테이블을 한 트랜잭션으로 몇 시간 동안 읽는 추출 잡이 있다. 잡은 `SELECT`만 하는데 그동안 원천의 `History list length`가 계속 오르고, 같은 테이블을 읽는 서비스 쿼리가 느려진다. MVCC에서는 읽기만 하는 트랜잭션도 옛 버전을 붙잡고 있기 때문이다. 추출 쿼리가 어느 시점을 보는지, 원천에 무엇을 남기는지가 데이터 엔지니어가 격리 수준을 알아야 하는 이유다.

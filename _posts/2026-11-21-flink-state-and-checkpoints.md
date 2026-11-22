@@ -3,6 +3,7 @@ title: "Flink 잡은 재시작할 때 무엇을 들고 돌아오나"
 date: 2026-11-21 03:10:00 +0900
 categories: [Streaming, Flink]
 tags: [flink, checkpoint, savepoint, state-backend, rocksdb, kafka, exactly-once, concept]
+description: "Flink 잡이 재시작하면 연산자 상태와 source 오프셋은 체크포인트로 함께 복구되지만 sink 결과는 쓰는 방식에 따라 중복될 수 있어, 그 차이를 두 가상 잡으로 비교한다."
 ---
 
 Flink 잡이 죽었다 다시 뜨면 세 가지를 맞춰야 한다. 연산자가 들고 있던 상태, source가 어디까지 읽었는지, sink가 이미 밖으로 내보낸 결과다. 앞의 둘은 체크포인트 하나로 같이 되돌아간다. 세 번째는 sink가 쓰는 방식에 따라 중복이 되기도 하고 그대로 맞기도 한다. 광고 클릭을 세어 MySQL에 차단 후보를 쌓는 잡과 외부 API를 부르는 매칭 잡, 두 가상의 잡을 예로 들어 이 세 번째를 어떻게 다루는지 비교한다.

@@ -3,6 +3,7 @@ title: "주문부터 체결과 잔고까지, 거래소 매칭 엔진 설계"
 date: 2026-11-21 06:27:00 +0900
 categories: [System Design, Exchange]
 tags: [matching-engine, order-book, event-sourcing, raft, aeron, double-entry, system-design]
+description: "주문 접수부터 잔고 확인, 호가창 체결, 잔고 반영까지 모든 단계가 같은 순서를 보게 하는 거래소 매칭 엔진을 이벤트 소싱과 Raft 합의 기반으로 설계한다."
 mermaid: true
 ---
 

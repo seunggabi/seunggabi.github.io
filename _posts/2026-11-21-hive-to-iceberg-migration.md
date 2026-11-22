@@ -3,6 +3,7 @@ title: "Hive에서 Iceberg로 갈 때 데이터 파일은 두고 메타데이터
 date: 2026-11-21 11:30:00 +0900
 categories: [Lakehouse & Storage, Iceberg]
 tags: [iceberg, hive, migration, spark, athena, partitioning, concept]
+description: "Hive 테이블을 데이터 재작성 없이 Iceberg로 옮기는 migrate, snapshot, add_files 프로시저의 차이와 파티션 재설계 시점을 설명한다."
 ---
 
 매일 `MSCK REPAIR TABLE`로 새 날짜를 등록하는 Hive 테이블이 있다. 이걸 Iceberg로 옮기는 가장 단순한 방법은 CTAS로 새 테이블에 전부 다시 쓰는 것이다. 하루 100GB씩 3년 쌓였다면 약 110TB를 읽고 다시 쓴다. 다시 쓰지 않고 옮기는 길도 있다. Iceberg의 Spark 프로시저 `migrate`, `snapshot`, `add_files`는 데이터 파일은 그대로 두고 메타데이터만 만든다. 그다음 정할 건 둘이다. 파티션 설계를 언제 바꾸는가, 그리고 옛 데이터를 어디까지 다시 쓰는가.

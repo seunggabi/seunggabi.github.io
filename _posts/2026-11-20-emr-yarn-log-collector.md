@@ -3,6 +3,7 @@ title: "활성 EMR 클러스터를 모두 도는 YARN 기록 수집 PR"
 date: 2026-11-20 03:55:00 +0900
 categories: [Platform & Infra, AWS]
 tags: [open-source, emr, hadoop, yarn, aws-cli]
+description: "Hadoop을 EMR로 옮길 때 비용 산정에 쓰는 TCO 시뮬레이터의 yarn-log-collector가, 활성 EMR 클러스터를 모두 돌며 YARN 작업 기록을 수집하도록 고친 PR을 설명한다."
 ---
 
 온프레미스 Hadoop을 Amazon EMR로 옮기려면 비용부터 따져야 한다. 지금 클러스터에서 어떤 작업이 얼마나 자원을 쓰는지 알아야 EMR에서 몇 대를 어떤 인스턴스로 띄울지 계산할 수 있다.

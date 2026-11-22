@@ -3,6 +3,7 @@ title: "수집, 적재, 적재 후로 나눈 데이터 품질 검사"
 date: 2026-11-20 04:54:00 +0900
 categories: [Data Quality, Testing]
 tags: [data-quality, dbt, great-expectations, delta-lake, concept]
+description: "데이터 품질 검사를 수집, 적재, 적재 후 세 단계로 나누고 각 단계에서 무엇을 묻고 실패하면 어떻게 할지를 dbt Core와 GX Core 예시로 정리한다."
 ---
 
 [로그 수집 API](/posts/log-collection-api/)는 Kafka로 보내기 전에 로그 한 건마다 스키마 버전, 이벤트 시각, 재생 시간 숫자를 확인했다. 그 로그가 Hive에 쌓인 뒤에는 [Spark Streaming으로 Hive에 쌓은 글](/posts/spark-streaming-to-hive/)의 점검 배치가 지난 14일의 행 수를 날짜와 시간별로 셌다. 둘 다 품질 검사지만, 앞은 한 건을 보고 뒤는 쌓인 테이블을 본다. 검사 위치는 셋으로 나눌 수 있다. 들어오는 한 건을 보는 수집 단계, 한 번에 올린 묶음을 보는 적재 단계, 쌓인 테이블을 시간 축으로 보는 적재 후 단계다. 단계마다 묻는 것이 다르고, 실패했을 때 할 수 있는 일도 다르다.

@@ -3,6 +3,7 @@ title: "Pod가 사라졌을 때를 기준으로 쿠버네티스 워크로드 고
 date: 2026-11-20 05:13:00 +0900
 categories: [Platform & Infra, Kubernetes]
 tags: [kubernetes, helm, statefulset, cronjob, jvm, concept]
+description: "Pod 하나로 띄운 릴레이는 노드가 죽으면 돌아오지 않는다. Pod가 사라졌을 때 누가 다시 만드는지를 기준으로 Deployment, StatefulSet, Job, CronJob을 고르는 방법을 정리한다."
 ---
 
 Pod 하나로 띄운 릴레이는 프로세스가 죽으면 다시 뜨지만, 노드가 죽으면 돌아오지 않는다. [Logstash Kafka 릴레이 글](/posts/logstash-kafka-relay/)의 릴레이가 Deployment 없이 Pod 하나로 돌았고, 그 글은 이 점을 매니페스트를 몇 줄로 끝낸 대가로 적었다. 워크로드 객체마다 무엇이 죽었을 때 무엇을 다시 만들어 주는지가 다르고, 데이터 컴포넌트에 맞는 객체도 그 차이로 고른다.

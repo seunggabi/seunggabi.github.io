@@ -3,6 +3,7 @@ title: "로그 수집 API에서 데이터 품질을 먼저 챙겼다"
 date: 2026-11-20 04:10:00 +0900
 categories: [Ingestion & CDC, Batch Ingestion]
 tags: [spring-boot, kafka, data-quality, logging]
+description: "음악·오디오 서비스의 앱과 웹 행동 로그를 받아 검증하고 덧붙여 Kafka로 보내는 Spring Boot API에서, 데이터 품질을 먼저 챙긴 방식을 정리한다."
 mermaid: true
 ---
 

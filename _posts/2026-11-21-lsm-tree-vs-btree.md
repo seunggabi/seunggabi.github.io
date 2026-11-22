@@ -3,6 +3,7 @@ title: "LSM 트리는 랜덤 쓰기를 어떻게 순차 쓰기로 바꾸나"
 date: 2026-11-21 06:00:00 +0900
 categories: [Lakehouse & Storage, Storage Engines]
 tags: [lsm-tree, b-tree, rocksdb, cassandra, leveldb, compaction, bloom-filter, concept]
+description: "B-tree가 페이지를 제자리에서 고치는 것과 달리, LSM 트리는 쓰기를 메모리에 모았다가 정렬된 파일로 한꺼번에 내려 랜덤 쓰기를 순차 쓰기로 바꾼다. compaction 전략의 차이도 다룬다."
 ---
 
 B-tree에 행 하나를 넣으면 그 키가 들어갈 리프 페이지를 찾아 그 자리에서 고친다. 키가 고르게 흩어져 들어오면 디스크 곳곳의 페이지를 하나씩 다시 쓰게 된다. LSM 트리는 쓰기를 메모리에 모았다가 정렬된 파일로 한꺼번에 내리고, 파일은 다시 고치지 않는다. 그 대가로 읽기는 파일 여러 개를 뒤져야 하고, 쌓인 파일을 합치는 compaction이 뒤에서 계속 돈다.

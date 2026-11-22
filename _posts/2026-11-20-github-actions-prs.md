@@ -4,6 +4,7 @@ title: "GitHub Action 세 개에 기능을 넣고 버그를 고쳤다"
 date: 2026-11-20 03:50:00 +0900
 categories: [Platform & Infra, GitHub Actions]
 tags: [open-source, github-actions, automation, javascript]
+description: "마일스톤 생성, 리뷰어 배정, 작성자 지정을 맡는 GitHub Action 세 개에 기능을 넣고 버그를 고쳐 보낸 PR과 그 변경 내용을 정리한다."
 ---
 
 GitHub 저장소 운영을 자동화하는 작은 Action들이 있다. PR 작성자를 담당자로 지정하고, 리뷰어를 배정하고, 주간 마일스톤을 미리 만들어 두는 것들이다. 이런 Action 세 개에 PR을 보냈고, 모두 머지됐다.

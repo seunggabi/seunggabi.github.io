@@ -3,6 +3,7 @@ title: "인덱스가 있는데 옵티마이저가 풀 스캔을 고르는 이유
 date: 2026-11-21 06:10:00 +0900
 categories: [Batch & Query, SQL]
 tags: [index, query-plan, explain, mysql, innodb, postgresql, join, concept]
+description: "MySQL orders 테이블에 인덱스가 있는데도 DATE 함수 조건 때문에 풀 스캔이 되는 사례로, InnoDB와 PostgreSQL의 인덱스 구조와 옵티마이저의 실행 계획 선택을 설명한다."
 ---
 
 원천 MySQL `orders` 테이블의 `updated_at`에 인덱스가 있는데, 하루치를 뽑는 추출 쿼리의 `EXPLAIN`이 `type: ALL`, `key: NULL`을 보여 준다. 조건은 `WHERE DATE(updated_at) = '2026-11-20'`이었다. 같은 테이블에서 30일치를 범위 조건으로 제대로 쓴 backfill 쿼리도 풀 스캔을 골랐다. 앞의 것은 인덱스를 쓸 수 없는 모양으로 쓴 쿼리이고, 뒤의 것은 옵티마이저가 풀 스캔이 더 싸다고 계산한 결과다. 둘을 가르려면 인덱스가 행까지 어떻게 가는지와 실행 계획의 어느 줄을 읽어야 하는지 알아야 한다.

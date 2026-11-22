@@ -3,6 +3,7 @@ title: "Superset 시간 필터가 마이크로초 컬럼에서 깨져서 epoch_u
 date: 2026-11-20 00:30:00 +0900
 categories: [BI & Serving, Superset]
 tags: [open-source, superset, timestamp, debezium, iceberg, athena, trino]
+description: "Superset의 Datetime format에는 epoch_s와 epoch_ms뿐이라 마이크로초 정수 컬럼의 시간 필터가 깨졌다. epoch_us를 추가해 머지된 PR의 배경과 과정을 정리한다."
 mermaid: true
 image:
   path: /assets/img/posts/superset-epoch-us/pr-merged.webp

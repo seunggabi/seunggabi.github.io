@@ -3,6 +3,7 @@ title: "분 단위 실시간 지표 대시보드를 다음 날 배치와 맞추�
 date: 2026-11-21 06:21:00 +0900
 categories: [System Design, Real-time Analytics]
 tags: [flink, pinot, kafka, real-time-olap, hyperloglog, reconciliation, system-design]
+description: "분 단위 실시간 지표 대시보드의 숫자가 다음 날 일 배치 결과와 어디서 갈리는지 짚고, Flink와 Pinot으로 두 값을 맞추는 방법을 설계한다."
 mermaid: true
 ---
 

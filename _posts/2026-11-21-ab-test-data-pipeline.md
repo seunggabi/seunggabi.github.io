@@ -3,6 +3,7 @@ title: "배정부터 SRM 검사까지 A/B 테스트 데이터 파이프라인"
 date: 2026-11-21 05:27:00 +0900
 categories: [Batch & Query, SQL]
 tags: [ab-test, experimentation, spark, sql, statistics, concept]
+description: "50:50 실험에서 대조군과 실험군 인원이 어긋나는 SRM 문제를 출발점으로, 해시 버킷팅 배정부터 노출 로깅, SRM 검사까지 A/B 테스트 데이터 파이프라인을 정리한다."
 ---
 
 50:50으로 나눈 실험의 분석 테이블에 대조군 100,000명, 실험군 98,000명이 들어왔다고 하자. 비율로는 50.5% 대 49.5%라 우연처럼 보이지만 카이제곱 검정의 p-value는 0.00001보다 작다. 이 상태에서 실험군 전환율이 올랐다는 숫자는 믿을 수 없다. 빠진 2,000명이 왜 빠졌는지가 결과와 엮여 있을 수 있기 때문이다. A/B 테스트가 틀리는 곳은 통계 공식보다 배정, 로그, 조인 같은 데이터 쪽인 경우가 많다. 용어와 검사 기준은 Kohavi, Tang, Xu의 *Trustworthy Online Controlled Experiments*(2020)와 Microsoft 실험 플랫폼(ExP) 팀의 논문을 따랐다.

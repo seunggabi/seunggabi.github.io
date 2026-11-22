@@ -3,6 +3,7 @@ title: "Helm release 이름이 40자를 넘으면 Airflow의 Redis나 PostgreSQL
 date: 2026-11-20 02:40:00 +0900
 categories: [Platform & Infra, Kubernetes]
 tags: [open-source, airflow, helm, kubernetes, statefulset]
+description: "커뮤니티 Airflow Helm 차트에서 release 이름이 길면 PostgreSQL이나 Redis 파드가 뜨지 않아 DB에 붙지 못한 문제와 해결 과정을 다룬다."
 image:
   path: /assets/img/posts/airflow-helm-release-name/pr.webp
   alt: airflow-helm/charts PR 589 머지 화면

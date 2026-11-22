@@ -3,6 +3,7 @@ title: "Iceberg 스냅샷 계보로 되돌리고 브랜치로 검증하기"
 date: 2026-11-21 03:30:00 +0900
 categories: [Lakehouse & Storage, Iceberg]
 tags: [iceberg, snapshot, time-travel, branching, spark, concept]
+description: "Iceberg 스냅샷 계보를 따라 잘못된 덮어쓰기를 롤백하고, 브랜치로 변경을 먼저 검증하며, 스냅샷 만료와 다른 writer의 커밋이 되돌리기에 주는 영향을 다룬다."
 mermaid: true
 ---
 

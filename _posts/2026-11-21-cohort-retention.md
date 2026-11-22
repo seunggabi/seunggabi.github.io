@@ -3,6 +3,7 @@ title: "코호트 리텐션 표는 무엇을 정하고 어떻게 쌓을까"
 date: 2026-11-21 05:20:00 +0900
 categories: [Batch & Query, SQL]
 tags: [retention, cohort, sql, spark, trino, concept]
+description: "코호트 리텐션 표에서 0%와 아직 모름이 섞이는 문제를 짚고, N-day와 unbounded, bracket 리텐션의 정의와 SQL로 쌓는 방법을 Spark, Trino 기준으로 설명한다."
 ---
 
 11월 2일 가입 cohort의 D7 리텐션 칸이 0%로 나왔다. 아무도 돌아오지 않은 게 아니라, 데이터가 11월 8일까지만 들어와서 7일째가 아직 오지 않았을 뿐이다. 리텐션 표는 이런 빈칸 하나에도 "0"과 "아직 모름"이 섞인다. 같은 로그로도 cohort를 무엇으로 묶는지, 누구를 활성으로 보는지, N일째를 어떻게 세는지에 따라 숫자가 달라진다. [퍼널 분석 글](/posts/funnel-analysis/)이 진입 cohort가 다음 단계로 넘어가는 비율을 봤다면, 리텐션은 같은 cohort가 며칠 뒤에도 다시 오는 비율을 본다.

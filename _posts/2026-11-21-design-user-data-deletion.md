@@ -3,6 +3,7 @@ title: "탈퇴한 사용자의 데이터를 모든 사본에서 지우는 설계
 date: 2026-11-21 06:26:00 +0900
 categories: [System Design, Data Governance]
 tags: [gdpr, data-deletion, iceberg, kafka, crypto-shredding, data-governance, system-design]
+description: "계정을 지우면 Kafka, 레이크, 웨어하우스, 백업에 남은 모든 사본에서 기한 안에 읽을 수 없게 하고 감사 기록을 남기는 삭제 설계를 다룬다."
 mermaid: true
 ---
 

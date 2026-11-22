@@ -3,6 +3,7 @@ title: "Airflow 3에서 태스크 하나가 실행되기까지"
 date: 2026-11-21 05:16:00 +0900
 categories: [Orchestration, Airflow]
 tags: [airflow, scheduler, executor, triggerer, pool, xcom, assets, concept]
+description: "Airflow 3에서 태스크가 scheduled에 오래 머무는 원인을 스케줄러, DAG processor, executor, triggerer, pool의 역할로 따라가며 태스크 하나가 실행되기까지를 정리한다."
 mermaid: true
 ---
 

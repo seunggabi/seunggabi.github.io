@@ -3,6 +3,7 @@ title: "Flink 런타임 구조와 백프레셔 읽는 법"
 date: 2026-11-21 05:14:00 +0900
 categories: [Streaming, Flink]
 tags: [flink, streaming, backpressure, parallelism, scheduler, concept]
+description: "Flink의 JobManager, 태스크 슬롯, 체이닝과 credit 기반 흐름 제어를 짚어 백프레셔가 번지는 방식과 진짜 병목을 찾아 읽는 법을 설명한다."
 mermaid: true
 ---
 

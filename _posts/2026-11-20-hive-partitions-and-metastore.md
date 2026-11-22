@@ -3,6 +3,7 @@ title: "Hive 파티션은 메타스토어와 어긋나면 에러 없이 빈 결�
 date: 2026-11-20 05:12:00 +0900
 categories: [Lakehouse & Storage, Partitioning]
 tags: [hive, hive-metastore, partitioning, athena, aws-glue, spark, concept]
+description: "S3에 파티션 폴더와 파일이 있어도 메타스토어에 등록되지 않으면 Athena가 에러 없이 0건을 내는 이유와 MSCK REPAIR 등 대처를 정리한다."
 ---
 
 S3에 `dt=2026-11-19/` 폴더가 생겼고 파일도 들어 있는데, Athena에서 그날을 조회하면 0건이 나온다. 에러는 없다. Hive 스타일 테이블의 파티션은 저장소의 디렉터리와 메타스토어의 파티션 항목, 두 곳에 따로 있고, 쿼리 엔진은 메타스토어에 등록된 파티션만 읽는다. 두 곳을 맞추는 일은 쓰는 쪽이 따로 해야 한다.

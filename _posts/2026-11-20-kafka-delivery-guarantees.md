@@ -3,6 +3,7 @@ title: "Kafka 전달 보장, 개념과 실무에서 고르는 방법"
 date: 2026-11-20 04:41:00 +0900
 categories: [Streaming, Kafka]
 tags: [kafka, consumer-group, offset, exactly-once, deduplication, concept]
+description: "Kafka 컨슈머가 처리와 오프셋 커밋 중 무엇을 먼저 하느냐에 따라 달라지는 at-most-once, at-least-once, exactly-once 전달 보장을 정리한다."
 ---
 
 Kafka 컨슈머가 죽었다가 다시 뜨면 이미 처리한 메시지를 또 받거나, 받기만 하고 처리하지 못한 메시지를 건너뛴다. 어느 쪽이 되는지는 메시지를 처리하는 일과 "여기까지 읽었다"를 기록하는 일 중 무엇을 먼저 하느냐가 정한다. at-most-once, at-least-once, exactly-once는 그 순서에 붙은 이름이다. 이 글은 먼저 세 가지가 무엇인지 정리하고, 실무에서 어떤 조합을 고르는지로 넘어간다. 버전은 Kafka 4.4 기준이다.

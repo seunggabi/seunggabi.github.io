@@ -3,6 +3,7 @@ title: "수백만 개 예약 작업을 제시간에 한 번씩 실행하는 스�
 date: 2026-11-21 06:36:00 +0900
 categories: [System Design, Orchestration]
 tags: [job-scheduler, cron, lease, fencing-token, postgresql, system-design]
+description: "cron과 지연 작업 2,000만 개를 정각 몰림과 GC 정지에도 제시간에 한 번씩 실행하는 분산 스케줄러를 리스와 펜싱 토큰 중심으로 설계한다."
 mermaid: true
 ---
 

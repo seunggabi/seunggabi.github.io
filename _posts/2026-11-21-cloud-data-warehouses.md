@@ -3,6 +3,7 @@ title: "클라우드 웨어하우스는 저장과 계산을 어떻게 나눌까"
 date: 2026-11-21 06:14:00 +0900
 categories: [Batch & Query, Data Warehouse]
 tags: [snowflake, bigquery, redshift, data-warehouse, lakehouse, iceberg, elt, concept]
+description: "Snowflake, BigQuery, Redshift가 저장과 계산을 분리하는 방식과 레이크하우스, ELT와의 차이를 정리해 어떤 웨어하우스 구조가 맞는지 비교한다."
 ---
 
 저장과 계산이 한 노드에 묶인 웨어하우스에서는 디스크가 차면 노드를 늘려야 하고, 노드를 늘리면 쓰지 않을 CPU까지 산다. 월말 집계와 대시보드 쿼리가 같은 클러스터에서 부딪혀도 따로 떼어 낼 방법이 없다. Snowflake, BigQuery, Redshift는 모두 데이터를 공유 저장소에 두고 계산을 따로 늘리지만, 계산을 무엇으로 세고 어떤 메타데이터로 읽을 범위를 줄이는지는 셋이 다르다.

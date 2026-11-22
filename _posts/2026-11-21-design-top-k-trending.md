@@ -3,6 +3,7 @@ title: "지역별 실시간 급상승 검색어 상위 10개 설계"
 date: 2026-11-21 06:23:00 +0900
 categories: [System Design, Real-time Analytics]
 tags: [top-k, heavy-hitters, count-min-sketch, flink, redis, system-design]
+description: "초당 10만 건 검색 이벤트에서 지역별 인기·급상승 검색어 상위 10개를 Count-Min Sketch와 Flink로 1분마다 갱신하는 구조를 설계한다."
 mermaid: true
 ---
 

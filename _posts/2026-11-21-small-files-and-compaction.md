@@ -3,6 +3,7 @@ title: "작은 파일은 쓰는 쪽에서 막고 남은 것만 합친다"
 date: 2026-11-21 05:22:00 +0900
 categories: [Lakehouse & Storage, Iceberg]
 tags: [small-files, compaction, iceberg, spark, hive, s3-tables, concept]
+description: "태스크 수와 파티션 수가 곱해져 생기는 작은 파일을 쓰는 쪽에서 먼저 막는 방법과, 남은 파일을 Iceberg 등에서 compaction으로 합치는 방법을 정리한다."
 ---
 
 일 단위 파티션 테이블에 Spark 배치가 태스크 200개로 한 달치를 쓰면, 태스크마다 30개 날짜에 파일을 하나씩 열어 최대 6,000개 파일이 생긴다. 데이터 양은 같은데, 그 뒤의 모든 쿼리가 파일 목록을 받고 파일을 열고 메타데이터를 읽는 일을 6,000번 한다. 작은 파일의 비용은 바이트보다 파일 수를 따라간다.

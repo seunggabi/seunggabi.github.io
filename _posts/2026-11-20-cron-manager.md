@@ -3,6 +3,7 @@ title: "crontab을 통째로 갈아 끼우는 앱에 백업과 잠금을 뒀다"
 date: 2026-11-20 04:20:00 +0900
 categories: [AI & Tooling, Automation]
 tags: [cron, crontab, electron, typescript, side-project]
+description: "crontab을 통째로 교체하는 방식의 위험을 줄이려고, Electron 앱 cron-manager에 백업과 잠금을 넣고 메타데이터를 주석으로 보관한 설계를 정리한다."
 image:
   path: /assets/img/posts/cron-manager/m3_backup.png
   alt: Cron Manager 백업 관리 화면

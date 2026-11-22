@@ -3,6 +3,7 @@ title: "다시 돌려도 안전한 Airflow DAG의 날짜와 파티션 다루기"
 date: 2026-11-20 04:44:00 +0900
 categories: [Orchestration, Airflow]
 tags: [airflow, idempotency, backfill, concept]
+description: "retry, clear, 백필로 태스크가 여러 번 돌아도 같은 결과가 나오도록 Airflow DAG의 날짜와 파티션을 DAG run 기준으로 다루는 방법을 정리한다."
 ---
 
 Airflow 태스크는 한 번만 돈다는 보장이 없다. 실패하면 retry로 다시 돌고, 사람이 clear를 누르면 또 돌고, 백필을 걸면 지난 날짜로 한꺼번에 돈다. 그때마다 행이 두 배가 되거나 엉뚱한 날짜를 처리하면, 스케줄러가 아무리 잘 돌아도 데이터는 틀린다.

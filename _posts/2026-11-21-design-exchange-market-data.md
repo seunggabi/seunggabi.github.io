@@ -3,6 +3,7 @@ title: "매칭 엔진 로그 뒤의 시세 배포와 캔들, 정산 설계"
 date: 2026-11-21 06:28:00 +0900
 categories: [System Design, Exchange]
 tags: [market-data, websocket, kafka, flink, clickhouse, iceberg, reconciliation, system-design]
+description: "매칭 엔진 이벤트 로그 뒤에서 30만 WebSocket 연결에 호가와 체결을 배포하고 캔들과 정산을 만드는 시세 배포 설계를 Kafka, Flink, ClickHouse 기준으로 다룬다."
 mermaid: true
 ---
 

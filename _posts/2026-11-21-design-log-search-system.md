@@ -3,6 +3,7 @@ title: "하루 수십 TB 애플리케이션 로그를 검색하는 설계"
 date: 2026-11-21 06:34:00 +0900
 categories: [System Design, Observability]
 tags: [logging, opentelemetry, kafka, clickhouse, loki, opensearch, system-design]
+description: "서비스 3,000개가 하루 30TB 로그를 남길 때 최근 7일은 몇 초 안에 검색하고 오래된 로그는 싸게 보관하는 수집, 저장, 검색 구조를 설계한다."
 mermaid: true
 ---
 

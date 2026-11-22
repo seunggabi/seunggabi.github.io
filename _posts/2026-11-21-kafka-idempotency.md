@@ -3,6 +3,7 @@ title: "Kafka 멱등 프로듀서는 어떤 중복까지 막을까"
 date: 2026-11-21 05:03:00 +0900
 categories: [Streaming, Kafka]
 tags: [kafka, idempotence, transactions, exactly-once, outbox, concept]
+description: "Kafka 멱등 프로듀서가 막는 중복의 범위와 한계를 설명하고, 트랜잭션과 Kafka 밖 sink의 멱등 키, outbox까지 중복을 막는 세 층을 정리한다."
 ---
 
 `enable.idempotence=true`인 프로듀서로 보냈는데 토픽에 같은 주문 이벤트가 두 번 들어 있다. 설정이 꺼진 것도, 브로커가 잘못한 것도 아니다. 멱등 프로듀서는 한 프로듀서 세션이 같은 배치를 재시도할 때만 중복을 지우고, 프로세스가 재시작했거나 애플리케이션이 `send()`를 두 번 부른 경우는 처음부터 다른 레코드로 본다.

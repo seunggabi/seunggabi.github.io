@@ -3,6 +3,7 @@ title: "Trino는 쿼리를 어떻게 쪼개 메모리로 흘려보내는가"
 date: 2026-11-21 05:21:00 +0900
 categories: [Batch & Query, Trino·Athena]
 tags: [trino, athena, query-engine, dynamic-filtering, fault-tolerant-execution, cost-based-optimizer, concept]
+description: "Trino가 쿼리를 stage 트리로 쪼개 워커에 나눠 주고 메모리로 흘려보내는 실행 모델을 설명하고, 동적 필터링과 fault-tolerant 실행이 Athena에서 갖는 의미를 다룬다."
 ---
 
 Athena에서 큰 윈도 함수나 조인이 `Query exhausted resources at this scale factor`로 실패하고, 같은 쿼리가 조인 순서만 바꾸면 통과하는 일이 있다. 둘 다 Trino의 실행 모델에서 나온다. Trino는 쿼리를 stage 트리로 쪼개 워커에 나눠 주고, stage 사이 데이터를 중간 파일 없이 메모리 버퍼로 흘려보낸다. 그래서 빠르고, 같은 이유로 메모리가 모자라거나 노드 하나가 죽으면 쿼리 전체가 실패한다.

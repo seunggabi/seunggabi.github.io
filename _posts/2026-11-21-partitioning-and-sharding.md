@@ -3,6 +3,7 @@ title: "범위로 나눌까 해시로 나눌까, 파티셔닝과 샤딩"
 date: 2026-11-21 06:04:00 +0900
 categories: [Platform & Infra, Distributed Systems]
 tags: [partitioning, sharding, consistent-hashing, cassandra, dynamodb, redis, concept]
+description: "범위 파티셔닝과 해시 파티셔닝이 노드 증설, 핫 키, 보조 인덱스에서 어떻게 갈리는지 Cassandra, DynamoDB, Redis Cluster 등 여러 시스템을 놓고 비교한다."
 ---
 
 [연말 결산 Spark 잡 글](/posts/year-end-recap-spark/)의 잡들에는 "파티션"이 다섯 가지 뜻으로 나온다. Hive 중간 테이블의 `type`, `dt` 파티션, `RANK() OVER (PARTITION BY user_id ...)`, `DISTRIBUTE BY user_id`, `mapPartitions`, 그리고 사용자 ID를 행 키로 쓰는 HBase 테이블의 리전이다. 나누는 대상도, 나누는 주체도, 수를 바꾸는 비용도 서로 다르다.

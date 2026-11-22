@@ -3,6 +3,7 @@ title: "변경 로그를 키마다 다시 적용하는 CDC 이해하기"
 date: 2026-11-20 06:00:00 +0900
 categories: [Ingestion & CDC, Debezium]
 tags: [cdc, debezium, mysql, postgresql, kafka, iceberg, concept]
+description: "updated_at 기반 쿼리 배치가 놓치는 삭제와 중간 변경을, Debezium 같은 로그 기반 CDC가 변경 로그를 읽어 해결하는 원리를 정리한다."
 mermaid: true
 ---
 

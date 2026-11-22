@@ -4,6 +4,7 @@ title: "남의 저장소에 보낸 PR 78개를 숫자로 정리했다"
 date: 2026-11-20 03:45:00 +0900
 categories: [Career, Open Source]
 tags: [open-source, github, graphql, retrospective]
+description: "2018년부터 2026년 11월까지 47개 저장소에 보낸 PR 78개를 GitHub GraphQL로 뽑아 숫자로 정리하고, 그 데이터를 뽑은 방법을 설명한다."
 mermaid: true
 ---
 

@@ -3,6 +3,7 @@ title: "쿼리 하나가 1,001번이 되는 N+1 문제"
 date: 2026-11-22 12:50:00 +0900
 categories: [Batch & Query, SQL]
 tags: [n-plus-one, orm, jpa, hibernate, sqlalchemy, django, sql, spark, concept]
+description: "목록 쿼리 1번 뒤에 행마다 연관 데이터 쿼리를 또 보내 1,001번이 되는 N+1 문제의 원인과, fetch join 등 ORM에서 이를 한 쿼리로 줄이는 방법을 정리한다."
 ---
 
 ```text

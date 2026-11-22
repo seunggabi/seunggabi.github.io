@@ -3,6 +3,7 @@ title: "Spark 조인 전략은 크기 추정과 조인 조건으로 정해진다
 date: 2026-11-20 06:04:00 +0900
 categories: [Batch & Query, Spark]
 tags: [spark, spark-sql, join, broadcast-join, aqe, bucketing, concept]
+description: "같은 조인이 BroadcastHashJoin이 될지 SortMergeJoin이 될지는 크기 추정, 조인 조건, 힌트로 정해진다. Spark의 물리 조인 전략과 선택 순서를 정리한다."
 ---
 
 같은 조인이 실행 계획에서 `BroadcastHashJoin`으로 잡히면 큰 테이블은 셔플 없이 지나가고, `SortMergeJoin`으로 잡히면 양쪽 다 셔플하고 정렬한다. 어느 쪽이 될지는 Spark가 계획 시점에 추정한 크기, 조인 조건이 등호인지, 힌트, 그리고 실행 중에 AQE가 본 실제 크기로 갈린다. 셔플 자체와 AQE의 skew 처리는 [셔플과 skew 글](/posts/spark-shuffle-and-skew/)에 있다.

@@ -3,6 +3,7 @@ title: "실시간 OLAP 엔진은 무엇을 미리 해 두고 빨라지나"
 date: 2026-11-21 05:26:00 +0900
 categories: [BI & Serving, OLAP]
 tags: [clickhouse, druid, pinot, trino, athena, olap, concept]
+description: "필터를 바꿀 때마다 1초 안에 답해야 하는 대시보드를 위해, ClickHouse, Druid, Pinot이 적재 시점에 무엇을 미리 해 두는지 Trino, Athena와 견주어 살핀다."
 ---
 
 대시보드 사용자가 필터를 바꿀 때마다 1초 안에 답해야 하고, 몇 분 전 이벤트까지 숫자에 들어가야 한다고 하자. 레이크하우스 위의 Trino나 Athena는 쿼리마다 테이블 메타데이터를 읽고 S3 객체를 열어 집계하므로, 그 비용을 요청마다 다시 치른다. ClickHouse, Druid, Pinot은 데이터를 자기 저장 형식으로 적재하면서 정렬, 인덱스, 사전 집계를 미리 해 두고 그 대가로 빠르게 답한다.

@@ -3,6 +3,7 @@ title: "Iceberg 카탈로그는 포인터 하나로 커밋을 원자적으로 �
 date: 2026-11-21 03:34:00 +0900
 categories: [Lakehouse & Storage, Iceberg]
 tags: [iceberg, catalog, rest-catalog, s3-tables, aws-glue, flink, spark, concept]
+description: "Iceberg 카탈로그가 metadata.json 위치를 compare-and-swap으로 바꾸는 커밋 원리와, 동시 커밋 충돌 때 재시도 여부를 가르는 요소를 설명한다."
 mermaid: true
 ---
 

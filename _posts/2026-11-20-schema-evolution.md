@@ -3,6 +3,7 @@ title: "Avro 스키마 진화는 읽는 쪽이 쓴 쪽의 스키마를 알 때�
 date: 2026-11-20 04:51:00 +0900
 categories: [Ingestion & CDC, Avro]
 tags: [avro, schema-registry, kafka, schema-evolution, iceberg, concept]
+description: "프로듀서가 필드를 추가했을 때 컨슈머가 멈추는 이유를 Avro의 writer 스키마와 reader 스키마 해석 규칙으로 풀어, 스키마 진화가 동작하는 조건을 정리한다."
 ---
 
 프로듀서가 이벤트에 필드 하나를 더했는데, 배포 순서를 잘못 맞추면 컨슈머가 역직렬화에서 멈춘다. Avro 바이너리에는 필드 이름도 타입도 들어 있지 않아서, 읽는 쪽은 쓴 쪽의 스키마를 모르면 바이트를 해석할 수 없다. 이 차이를 다루는 방식은 크게 둘이다. Avro와 스키마 레지스트리로 읽는 쪽에 라이터 스키마를 찾아 주는 방식이 있고, [로그 수집 API 글](/posts/log-collection-api/)의 토픽처럼 스키마 버전마다 토픽을 따로 둔 JSON 방식이 있다. 이 글은 Avro의 스키마 해석 규칙, 레지스트리의 호환성 모드와 subject를 정리하고 두 방식을 비교한다. 버전은 Avro 1.12 스펙과 Confluent Platform 8.4 기준이다.

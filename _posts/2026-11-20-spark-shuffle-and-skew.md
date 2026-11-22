@@ -3,6 +3,7 @@ title: "Spark AQE가 셔플 뒤 실제 크기로 다시 정하는 것들"
 date: 2026-11-20 04:50:00 +0900
 categories: [Batch & Query, Spark]
 tags: [spark, spark-sql, shuffle, data-skew, aqe, broadcast-join, window-function, concept]
+description: "stage에서 몇몇 태스크만 오래 걸리는 원인인 셔플 파티션 쏠림을 중심으로, Exchange가 생기는 지점과 AQE가 셔플 뒤 실제 크기로 다시 정하는 것들을 정리한다."
 ---
 
 같은 stage의 태스크 대부분이 금방 끝나는데 몇 개만 오래 붙잡혀 있다면, 원인은 보통 셔플 파티션 하나에 데이터가 몰린 것이다. [연말 결산 글](/posts/year-end-recap-spark/)의 잡들은 1년 치 재생 로그를 `RANK() OVER (PARTITION BY user_id ...)`로 사용자마다 순위를 매겼다. 이런 쿼리는 셔플이 어디서 생기는지, 파티션 하나가 얼마나 커지는지에 따라 실행 시간이 갈린다. 버전은 Spark 4.3 기준이다.

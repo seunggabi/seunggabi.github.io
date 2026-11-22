@@ -3,6 +3,7 @@ title: "한 번 늘리면 줄일 수 없는 Kafka 파티션과 순서, 병렬성
 date: 2026-11-20 05:10:00 +0900
 categories: [Streaming, Kafka]
 tags: [kafka, partition, consumer-group, rebalance, consumer-lag, concept]
+description: "컨슈머를 늘려도 처리량이 그대로인 이유를 출발점으로, Kafka 파티션 수가 순서 보장과 병렬성, 리밸런스, 컨슈머 랙에 미치는 영향을 설명한다."
 ---
 
 컨슈머를 여섯 개에서 열두 개로 늘렸는데 처리량이 그대로다. `kafka-consumer-groups.sh --describe --members`를 보면 새로 띄운 컨슈머 여섯 개의 `#PARTITIONS`가 0이다. 토픽 파티션이 여섯 개라서 생기는 일이다.

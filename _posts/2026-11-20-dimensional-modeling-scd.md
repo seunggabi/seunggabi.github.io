@@ -3,6 +3,7 @@ title: "SCD로 지난 숫자를 지키는 차원 모델링"
 date: 2026-11-20 06:03:00 +0900
 categories: [Transformation & Modeling, Data Modeling]
 tags: [data-modeling, kimball, scd, iceberg, spark, cdc, concept]
+description: "사용자 속성이 바뀌어도 지난 집계가 틀어지지 않도록, 팩트와 차원의 grain을 정하고 SCD로 변경 이력을 보존하는 Kimball식 차원 모델링을 설명한다."
 ---
 
 사용자 하나가 지난달 중순 멤버십을 무료에서 유료로 바꿨다. 사용자 테이블이 현재 값만 들고 있으면, 오늘 다시 뽑은 지난달 멤버십별 재생 수에서 그 사람의 지난달 재생이 전부 유료 쪽으로 옮겨 간다. 원천 로그도 쿼리도 그대로인데 이미 보고한 숫자가 바뀐다. 차원 모델링에서 slowly changing dimension(SCD)이라고 부르는 문제다.

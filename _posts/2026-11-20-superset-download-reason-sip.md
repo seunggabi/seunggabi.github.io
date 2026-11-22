@@ -3,6 +3,7 @@ title: "Superset에 다운로드 사유를 남기자는 SIP-230 제안"
 date: 2026-11-20 03:10:00 +0900
 categories: [BI & Serving, Superset]
 tags: [open-source, superset, sip, privacy, audit-log]
+description: "개인정보가 든 테이블을 Superset에서 CSV로 내려받아도 다운로드 사유가 어디에도 남지 않는 문제를 짚고, 이를 해결하려는 제안을 정리한다."
 image:
   path: /assets/img/posts/superset-download-reason-sip/sip.webp
   alt: apache/superset SIP-230 이슈 화면

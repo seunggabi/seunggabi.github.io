@@ -3,6 +3,7 @@ title: "지난 숫자가 바뀌지 않는 커머스 분석 웨어하우스"
 date: 2026-11-21 06:25:00 +0900
 categories: [System Design, Data Warehouse]
 tags: [cdc, dbt, iceberg, scd, dimensional-modeling, data-warehouse, system-design]
+description: "운영 DB가 행을 계속 고쳐도 지난 숫자가 바뀌지 않도록 CDC, Iceberg, dbt와 SCD로 GMV와 순매출 등을 매일 내는 커머스 분석 웨어하우스 설계를 다룬다."
 mermaid: true
 ---
 

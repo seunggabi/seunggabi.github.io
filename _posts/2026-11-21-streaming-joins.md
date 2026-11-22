@@ -3,6 +3,7 @@ title: "끝나지 않는 스트림끼리 조인하면 상태가 남는다"
 date: 2026-11-21 06:06:00 +0900
 categories: [Streaming, Flink]
 tags: [flink, flink-sql, spark-streaming, structured-streaming, kafka-streams, join, watermark, concept]
+description: "끝없는 스트림끼리 조인하면 상태가 계속 쌓인다. regular, interval, window, temporal, lookup 조인이 상태를 어떻게 지우고 다루는지 Flink와 Spark 기준으로 비교한다."
 ---
 
 광고 노출 스트림과 클릭 스트림을 광고 ID로 조인한다고 하자. 배치라면 두 테이블을 끝까지 읽고 한 번 맞추면 끝난다. 스트림에는 끝이 없어서, 지금 들어온 클릭이 한 시간 전 노출과 맞을 수도 있고 내일 올 노출과 맞을 수도 있다. 엔진은 조건이 막아 주지 않는 한 양쪽에서 본 모든 행을 들고 있어야 한다. 스트림 조인의 종류는 결국 이 상태를 언제 지울 수 있는지, 그리고 이미 낸 결과를 고쳐야 하는지로 갈린다. 배치 쪽에서 Spark가 물리 조인을 고르는 방식은 [Spark 조인 전략 글](/posts/spark-join-strategies/)에 있다.

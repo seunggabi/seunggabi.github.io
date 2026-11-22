@@ -3,6 +3,7 @@ title: "네트워크가 끊기면 분산 저장소는 무엇을 내주나"
 date: 2026-11-21 06:02:00 +0900
 categories: [Platform & Infra, Distributed Systems]
 tags: [cap, pacelc, consistency, quorum, raft, zookeeper, cassandra, s3, concept]
+description: "네트워크 분할 때 분산 저장소가 내주는 것을 CAP와 PACELC, 일관성 모델, 쿼럼과 합의로 설명하고 Cassandra, HBase, ZooKeeper, S3 사례로 비교한다."
 ---
 
 Cassandra에 `CONSISTENCY ONE`으로 쓰고 곧바로 `ONE`으로 읽으면, 읽기가 다른 복제본에 닿았을 때 옛 값이 나올 수 있다. 기본 설정의 HBase에서는 같은 일이 생기지 않는다. 둘 다 정상 동작이다. 차이는 저장소가 약속한 일관성 모델과, 복제본 몇 개가 응답해야 성공으로 치는지에서 나온다. CAP은 이 질문 중 네트워크가 끊긴 동안의 선택만 답한다.

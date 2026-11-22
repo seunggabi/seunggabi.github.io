@@ -4,6 +4,7 @@ title: "작은 PR도 머지되기까지는 제각각이었다"
 date: 2026-11-20 03:25:00 +0900
 categories: [Career, Open Source]
 tags: [open-source, docs, airflow, athena, github-actions]
+description: "기능 PR이 아니라 문서 한 줄이나 링크 하나를 고친 작은 PR도 여럿 보냈고, 머지까지 하루가 걸린 것도 반년이 걸린 것도 있었다는 이야기를 정리한다."
 image:
   path: /assets/img/posts/small-oss-prs/pr.webp
   alt: apache/airflow-site PR 686 머지 화면

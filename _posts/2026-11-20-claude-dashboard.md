@@ -3,6 +3,7 @@ title: "Claude Code 세션을 k9s처럼 보는 TUI, claude-dashboard 구조"
 date: 2026-11-20 02:45:00 +0900
 categories: [AI & Tooling, Claude Code]
 tags: [claude-code, go, tui, tmux, bubbletea]
+description: "tmux에 띄운 여러 Claude Code 세션의 상태를 k9s처럼 한 표로 보여 주는 Go TUI, claude-dashboard의 동작 구조를 설명한다."
 mermaid: true
 image:
   path: /assets/img/posts/claude-dashboard/cover.webp

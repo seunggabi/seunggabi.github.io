@@ -3,6 +3,7 @@ title: "Iceberg의 행 단위 변경은 쓰기 비용을 읽기로 미룬다"
 date: 2026-11-20 06:01:00 +0900
 categories: [Lakehouse & Storage, Iceberg]
 tags: [iceberg, merge-on-read, compaction, spark, cdc, concept]
+description: "Iceberg의 merge-on-read 행 단위 변경이 쓰기 비용을 읽기 쪽으로 미루는 방식과, delete 파일이 쌓일 때 조회가 느려지는 이유를 설명한다."
 ---
 
 upsert가 계속 들어오는 Iceberg 테이블은 커밋이 쌓일수록 조회가 느려진다. 행 하나를 바꿀 때 데이터 파일을 다시 쓰지 않고 삭제 표시만 따로 남기면, 그 표시를 맞춰 보는 비용은 읽을 때마다 든다. delete 파일이 데이터 파일보다 많아질 만큼 쌓이면, 읽기 계획 단계에서 드라이버 메모리가 모자라 잡이 끝나기도 한다.

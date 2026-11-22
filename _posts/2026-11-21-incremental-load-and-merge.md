@@ -3,6 +3,7 @@ title: "CDC 없이 바뀐 행만 가져오는 증분 적재와 MERGE"
 date: 2026-11-21 05:28:00 +0900
 categories: [Ingestion & CDC, Batch Ingestion]
 tags: [incremental-load, merge-into, spark, iceberg, mysql, batch, concept]
+description: "updated_at 워터마크만 쓰는 증분 적재가 늦게 커밋된 행을 놓치는 이유와, lookback으로 겹쳐 읽고 MERGE INTO로 키 기준 한 벌로 반영하는 방법을 정리한다."
 ---
 
 원천 MySQL 테이블에서 한 시간마다 `updated_at`이 지난 실행보다 큰 행만 읽어 레이크 테이블에 반영하는 배치가 있다. 어느 날 주문 몇 건이 레이크에만 없다. 그 주문들은 긴 트랜잭션 안에서 10시 59분에 쓰였고 11시 2분에 커밋됐다. 11시 배치가 읽은 행 중 가장 늦은 `updated_at`은 10시 59분 58초였고, 그 값이 다음 실행의 하한이 됐다. 10시 59분이 찍힌 행은 커밋된 뒤에도 그 하한 아래에 있다.

@@ -3,6 +3,7 @@ title: "Iceberg 테이블을 다시 쓰지 않고 스키마와 파티션 바꾸�
 date: 2026-11-21 03:38:00 +0900
 categories: [Lakehouse & Storage, Iceberg]
 tags: [iceberg, schema-evolution, partitioning, spark, hive, cdc, concept]
+description: "Iceberg는 필드 ID 덕분에 컬럼 이름 변경과 파티션 변경을 파일 재작성 없이 메타데이터 커밋으로 처리하며, 다시 써야 하는 변경과의 경계를 스펙 규칙으로 설명한다."
 ---
 
 컬럼 타입을 정수에서 문자열로 바꾸려면 Iceberg 테이블도 다시 만들어야 한다. Iceberg 테이블에서 컬럼 이름을 바꾸거나 순서를 바꾸는 일은 파일 하나 건드리지 않고 끝난다. 일 단위 파티션을 시간 단위로 바꾸는 일도 메타데이터 커밋 한 번이다.

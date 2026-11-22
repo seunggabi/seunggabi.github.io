@@ -3,6 +3,7 @@ title: "초당 10만 건 이벤트로 Kafka 파티션, 디스크, 네트워크 �
 date: 2026-11-22 15:40:00 +0900
 categories: [System Design, Messaging]
 tags: [kafka, capacity-planning, partition, replication, system-design]
+description: "하루 20억 건, 피크 4배 가정에서 Kafka 파티션 수, 브로커 디스크, 네트워크가 각각 다른 숫자에서 나온다는 점을 단계별로 계산하며 크기를 잡는 과정을 보인다."
 ---
 
 설계 문제에서 Kafka 규모를 물으면 숫자 하나로 답하기 쉽다. "30MB/s니까 파티션 6개"처럼. 그런데 파티션 수, 브로커 디스크, 네트워크는 서로 다른 숫자에서 나온다. 디스크는 하루 총량, 즉 평균에서 나오고, 파티션과 네트워크는 초당 최댓값, 즉 피크에서 나온다. 거기에 복제 계수가 디스크와 네트워크에 곱해진다. 이 글은 [급상승 검색어 설계](/posts/design-top-k-trending/)의 검색 이벤트를 예로 들어 그 순서를 처음부터 끝까지 계산한다.

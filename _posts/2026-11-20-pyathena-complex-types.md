@@ -3,6 +3,7 @@ title: "MAP 컬럼이 NULL로 보인 Superset과 PyAthena 문제"
 date: 2026-11-20 02:30:00 +0900
 categories: [Batch & Query, Athena]
 tags: [open-source, pyathena, athena, superset, python]
+description: "Superset 차트에서 MAP 컬럼 값이 NULL로 보인 문제를 Kafka, Flink, Iceberg까지 따라가 보니 데이터는 멀쩡했고 값을 흘린 쪽은 PyAthena였다는 추적기다."
 mermaid: true
 image:
   path: /assets/img/posts/pyathena-complex-types/pr.webp

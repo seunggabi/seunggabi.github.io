@@ -3,6 +3,7 @@ title: "광고 클릭을 분 단위로 세고 청구까지 맞추는 설계"
 date: 2026-11-21 06:22:00 +0900
 categories: [System Design, Ad Tech]
 tags: [ad-tech, flink, kafka, exactly-once, spark, streaming, system-design]
+description: "하루 20억 건 광고 클릭을 분 단위로 세고 청구까지 맞추기 위해, 중복과 지연 도착, 쏠림을 다루는 Kafka와 Flink 기반 집계 설계를 규모 가정과 함께 다룬다."
 mermaid: true
 ---
 

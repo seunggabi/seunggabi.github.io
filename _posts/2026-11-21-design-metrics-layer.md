@@ -3,6 +3,7 @@ title: "어느 화면에서나 같은 매출을 내는 지표 계층"
 date: 2026-11-21 06:33:00 +0900
 categories: [System Design, Semantic Layer]
 tags: [semantic-layer, metricflow, metrics, trino, caching, row-level-security, system-design]
+description: "매출 같은 지표가 대시보드, 노트북, API마다 다르게 나오는 문제를 지표 계층으로 푸는 설계로, 조인 경로와 캐시, 권한, 정의 변경을 다룬다."
 mermaid: true
 ---
 

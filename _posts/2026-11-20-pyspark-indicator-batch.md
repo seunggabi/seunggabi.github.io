@@ -3,6 +3,7 @@ title: "서비스 지표 배치 수십 개를 job, data, query builder로 나눠
 date: 2026-11-20 04:05:00 +0900
 categories: [Batch & Query, Spark]
 tags: [pyspark, hive, mysql, django, celery, zeppelin]
+description: "음악·오디오 서비스에서 Hive 로그로 만드는 지표 배치 수십 개를 job, data, query builder로 나누어 관리한 PySpark 구조를 정리한다."
 mermaid: true
 ---
 

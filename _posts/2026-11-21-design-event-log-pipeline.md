@@ -3,6 +3,7 @@ title: "앱과 웹 이벤트 로그를 SDK에서 레이크까지 모으는 설�
 date: 2026-11-21 06:20:00 +0900
 categories: [System Design, Event Pipeline]
 tags: [clickstream, kafka, schema-registry, flink, iceberg, late-data, system-design]
+description: "수천만 기기의 앱과 웹 이벤트를 틀린 시계와 늦은 도착, 재시도 중복 속에서도 SDK에서 레이크까지 event_id마다 한 행으로 모으는 파이프라인 설계를 다룬다."
 mermaid: true
 ---
 

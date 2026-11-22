@@ -3,6 +3,7 @@ title: "실시간 테이블과 일별 테이블 중 어느 쪽을 믿을까"
 date: 2026-11-21 03:22:00 +0900
 categories: [Streaming, Spark Streaming]
 tags: [lambda-architecture, kappa-architecture, kafka, spark, flink, iceberg, late-data, concept]
+description: "같은 로그를 실시간 테이블과 일별 테이블에 쌓을 때 건수가 달라지는 문제를 Lambda와 Kappa 아키텍처로 풀어 보고, 어느 쪽 테이블을 믿을지 정리한다."
 ---
 
 같은 로그를 실시간 테이블과 일별 테이블에 함께 쌓으면, 같은 날짜의 건수가 두 테이블에서 조금씩 다르게 나온다. 예를 들어 앱 이벤트 로그를 Flink로 실시간 Iceberg 테이블에 넣고, S3 sink를 거쳐 Spark로 일별 테이블도 만든다고 하자. 실시간 테이블은 서버 수신 시각으로, 일별 테이블은 sink가 레코드를 처리한 시각으로 날짜를 자르면 자정 근처에 받은 로그는 두 테이블에서 다른 날짜에 들어갈 수 있다. 그러면 대시보드와 경고는 어느 쪽 숫자를 믿어야 하고, 로직이 바뀌면 과거는 어디서 다시 만들어야 할까.

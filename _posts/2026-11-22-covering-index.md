@@ -3,6 +3,7 @@ title: "커버링 인덱스가 테이블을 건너뛰는 조건과 대가"
 date: 2026-11-22 12:30:00 +0900
 categories: [Batch & Query, SQL]
 tags: [index, covering-index, mysql, innodb, postgresql, query-plan, pagination, concept]
+description: "OFFSET이 커질수록 느려지는 backfill 쿼리를 예로, 커버링 인덱스가 테이블 행 조회를 건너뛰는 조건과 인덱스를 키우는 대가를 MySQL InnoDB와 PostgreSQL 기준으로 다룬다."
 ---
 
 `status`로 거른 주문을 `id` 순서로 1,000행씩 잘라 읽는 backfill 쿼리는 처음 몇 페이지는 금방 끝난다. `OFFSET`이 50만을 넘으면 한 페이지에 몇 초씩 걸린다. `EXPLAIN`은 `status` 인덱스를 쓴다고 나온다.

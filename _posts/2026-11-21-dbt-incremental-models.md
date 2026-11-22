@@ -3,6 +3,7 @@ title: "dbt 증분 모델은 다시 읽는 범위와 키로 정해진다"
 date: 2026-11-21 05:23:00 +0900
 categories: [Transformation & Modeling, dbt]
 tags: [dbt, incremental, spark, trino, athena, scd, ci, concept]
+description: "dbt 증분 모델에서 새 행을 어디서부터 읽을지와 기존 테이블에 어떻게 합칠지를 정하는 lookback, incremental_strategy, unique_key 설정을 정리한다."
 ---
 
 매일 도는 dbt 모델을 `table`로 두면 실행할 때마다 원천 전체를 읽어 테이블을 새로 만든다. `incremental`로 바꾸면 새 행만 읽는 대신 두 가지를 직접 정해야 한다. 새 행을 어디서부터 읽을지, 읽은 행을 기존 테이블에 어떻게 합칠지다. 앞을 잘못 정하면 늦게 온 행이 빠지고, 뒤를 잘못 정하면 다시 돌릴 때 행이 두 벌이 된다. 둘 다 에러 없이 일어난다.
