@@ -106,6 +106,25 @@ cursor.execute("SELECT dt, count(*) FROM logs WHERE dt >= '2026-12-08' GROUP BY 
 
 제약도 많다. 기한이 끝날 때까지 원본 데이터 변경을 확인하지 않아 오래된 결과가 나올 수 있다. 원본 위치가 Lake Formation 데이터 위치로 등록된 테이블, 행·열 권한이 걸린 테이블, 카탈로그를 둘 이상 쓰는 쿼리는 재사용하지 않는다. Glue 카탈로그와 S3 Tables 카탈로그를 같이 쓰는 조인 쿼리가 이 조건에 걸린다. BI 도구 앞단에 Redis 같은 캐시를 두면 반복 조회를 막는 층을 Athena 바깥에 하나 더 둘 수 있다.
 
+## 비용을 줄이는 순서
+
+위 내용을 효과가 큰 순서로 묶으면 이렇다. 앞쪽일수록 쿼리 한 줄이나 테이블 한 번 변환으로 스캔량이 몇 배씩 준다.
+
+| 순서 | 할 일 | 줄어드는 이유 |
+|---|---|---|
+| 1 | `SELECT *` 대신 필요한 컬럼만 고른다 | Parquet·ORC는 고른 컬럼만 읽는다. 컬럼 50개 중 3개만 쓰면 스캔도 그 비율 근처로 준다 |
+| 2 | 파티션 키 조건을 꼭 넣는다 | Hive 스타일 테이블은 `dt` 조건이 없으면 모든 파티션을 연다. 원본 시각 컬럼 조건만으로는 걸러지지 않는다 |
+| 3 | 컬럼에 함수나 형 변환을 씌우지 않는다 | `date(created_at) = ...` 대신 원본 컬럼 범위 조건을 써야 파일의 최솟값·최댓값으로 건너뛴다 |
+| 4 | 텍스트 원본은 컬럼 포맷으로 바꿔 둔다 | gzip CSV·JSON은 한 컬럼만 골라도 파일 전체를 읽는다. CTAS로 Parquet·ORC 테이블을 만들어 그쪽을 읽게 한다 |
+| 5 | 작은 파일을 합치고, 자주 거르는 컬럼으로 정렬한다 | 파일이 작으면 열기 비용이 커지고, 정렬이 안 돼 있으면 최솟값·최댓값 범위가 넓어 건너뛸 파일이 없다 |
+| 6 | 대시보드용 중간 집계 테이블을 만든다 | 원본을 매번 훑는 대신 일 단위 집계를 CTAS·INSERT로 한 번 만들고 대시보드는 그 작은 테이블을 읽는다 |
+| 7 | 같은 쿼리 반복은 결과 재사용 | 기한 안의 같은 쿼리는 실행 자체를 건너뛴다 |
+| 8 | 워크그룹에 쿼리당 스캔 한도와 알림 | 실수로 날린 전체 스캔이 한도에서 멈춘다 |
+
+앞에서 본 것처럼 `LIMIT`은 스캔을 줄인다고 보장하지 않으니, 데이터 모양을 볼 때도 하루치 파티션 조건을 주거나 샘플 테이블을 한 번 만들어 그걸 본다. 쿼리마다 최소 10MB가 청구되므로 아주 작은 쿼리를 수천 번 나눠 보내기보다 한 쿼리로 묶는 편이 싸다.
+
+줄었는지는 숫자로 확인한다. 콘솔 쿼리 결과의 "Data scanned", 또는 `GetQueryExecution` 응답의 `DataScannedInBytes`를 바꾸기 전후로 비교한다. 단계마다 읽은 행과 바이트는 `EXPLAIN ANALYZE`로 본다.
+
 ## 참고 자료
 
 - [Amazon Athena pricing](https://aws.amazon.com/athena/pricing/)
@@ -126,4 +145,4 @@ cursor.execute("SELECT dt, count(*) FROM logs WHERE dt >= '2026-12-08' GROUP BY 
 
 ## English summary
 
-Athena bills SQL queries by the bytes they scan, rounded up to the megabyte with a 10 MB minimum, so cost depends on what the engine can skip, not on how long the query runs. Hive tables skip directories through registered partitions, which only works when the filter is on the partition key, while Iceberg tables pick files from manifests and support hidden partitioning on the source column. LIMIT does not tell the engine which files to skip, but columnar formats, CTAS, and UNLOAD reduce what later queries read. When Hive tables in Glue and Iceberg tables in S3 Tables sit side by side, cross-catalog joins cannot use Athena result reuse. Workgroup limits only cap a single query's scan, so the cheaper design choice is still how the table is partitioned and stored.
+Athena bills SQL queries by the bytes they scan, rounded up to the megabyte with a 10 MB minimum, so cost depends on what the engine can skip, not on how long the query runs. Hive tables skip directories through registered partitions, which only works when the filter is on the partition key, while Iceberg tables pick files from manifests and support hidden partitioning on the source column. LIMIT does not tell the engine which files to skip, but columnar formats, CTAS, and UNLOAD reduce what later queries read. When Hive tables in Glue and Iceberg tables in S3 Tables sit side by side, cross-catalog joins cannot use Athena result reuse. Workgroup limits only cap a single query's scan, so the cheaper design choice is still how the table is partitioned and stored. In order of impact: select only needed columns, always filter on the partition key, keep functions off filtered columns, convert text files to Parquet or ORC, compact and sort files, serve dashboards from small aggregate tables, and reuse results for repeated queries.
