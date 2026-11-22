@@ -141,6 +141,7 @@ S3 요청 요금은 종류마다 다르다. S3 Standard(us-east-1) 기준으로 
 | 파티션이 수천 개를 넘거나 파일이 많아 계획 시간이 길다 | Iceberg |
 | 파티션 컬럼이 아닌 컬럼으로 자주 거른다 | Iceberg + 그 컬럼으로 정렬 |
 | CDC upsert, 삭제, 여러 잡이 동시에 쓴다 | Iceberg. S3 위 Hive 스타일(비 ACID)은 원자적 커밋이 없다 |
+| 이력이 긴 CDC upsert 테이블인데 컴팩션이 sink 커밋을 못 따라간다 | 최근 며칠만 Iceberg에 두고 지난 이력은 매일 덤프한 Hive 일 파티션에서 읽는다(아래 묻고 답하기) |
 | 파티션 기준이나 스키마가 바뀔 가능성이 있다 | Iceberg |
 | 읽는 쪽이 Iceberg를 못 읽는 오래된 엔진이다 | Hive 스타일을 유지하거나 엔진부터 올린다 |
 
@@ -160,6 +161,35 @@ Q. 하루 수억 건이 쌓이는 테이블도 Iceberg로 괜찮나?
 
 append 전용이면 Iceberg가 가장 편한 경우다. delete 파일이 없어 읽을 때 맞춰 볼 것이 없고, 새 파일만 더하는 커밋끼리는 충돌도 거의 나지 않는다. 남는 일은 셋이다. 스트리밍으로 자주 커밋하면 작은 파일 컴팩션, 커밋마다 쌓이는 스냅샷 만료, 매니페스트가 잘게 늘면 매니페스트 합치기다. 하루 한 번 큰 파일로 쓰는 배치라면 스냅샷 만료 정도만 남는다.
 
+Q. CDC로 받는 큰 결제 이력 테이블도 Iceberg 하나에 전부 두면 되나?
+
+컴팩션이 sink 커밋을 따라가면 된다. Iceberg는 낙관적 동시성 제어라 sink 커밋과 컴팩션 커밋이 부딪히면 나중 쪽이 다시 시도하고, 그래도 맞지 않으면 실패한다. 컴팩션이 밀리면 그만큼 equality delete 파일이 쌓인다. 내가 맡은 CDC 테이블들은 upsert sink가 3분마다 커밋했고, S3 Tables 관리형 컴팩션이 `Internal error` 같은 오류로 반복 실패했다. 원인으로는 동시 쓰기 충돌을 의심했다. Athena CTAS로 다시 쓰는 것도 Athena 내부 오류로 실패했고, 수천만 건이 넘는 테이블은 Spark로 다시 쓰려면 클러스터를 키우고 CDC 수집을 잠시 멈추는 별도 조치가 필요하다고 봤다.
+
+그래서 결제 이력은 최근 7일만 Iceberg에 남기고 그보다 오래된 행은 매일 지운다. 지난 이력은 원천 DB를 하루 한 번 떠 오는 Hive 일 파티션 테이블에서 읽는다. Iceberg 쪽은 작게 유지되고, 큰 쪽은 delete 파일 없는 Parquet이라 `dt` 프루닝이 그대로 된다. 대신 맞춰야 할 것이 생긴다.
+
+| 나눠서 생기는 일 | 맞추는 방법 |
+|---|---|
+| 덤프한 뒤 바뀐 행(결제 취소) | 바뀐 원거래 날짜의 파티션을 다시 덤프한다 |
+| 두 곳에 같은 결제가 있음 | `UNION ALL`로 합치고 키마다 Iceberg 행을 먼저 고른다 |
+| 보존 일수와 쿼리 경계 | 지우는 잡의 보존 일수와 쿼리가 Hive로 넘어가는 경계를 같은 값으로 맞춘다 |
+
+```sql
+SELECT * FROM (
+  SELECT t.*, ROW_NUMBER() OVER (PARTITION BY payment_id ORDER BY src, version DESC) AS rn
+  FROM (
+    SELECT payment_id, is_refund, CAST(amount AS decimal(18,2)) AS amount, 0 AS src, cdc_offset AS version
+    FROM iceberg.db.payments
+    UNION ALL
+    SELECT payment_id, is_refund, CAST(amount AS decimal(18,2)), 1, 0
+    FROM hive.db.payments WHERE dt >= '2026-11-01'
+  ) t
+) WHERE rn = 1;
+```
+
+`UNION`(DISTINCT)으로는 안 된다. DISTINCT는 모든 컬럼이 같은 행만 하나로 합치는데, 덤프 뒤 취소된 결제는 두 출처의 `is_refund`가 달라 두 행이 그대로 남는다. 키마다 한 행을 고르려면 `ROW_NUMBER`가 있어야 한다.
+
+Iceberg 전체 이력에 날짜 파티션을 거는 길도 있다. 시간 컬럼이 Debezium이 보낸 epoch 밀리초 BIGINT라 `day`는 못 쓰고 `truncate(86400000, ...)`로 하루를 자른다([Iceberg 테이블 포맷 글](/posts/iceberg-table-format/)). 스펙을 바꿔도 새 파일에만 적용되니 지난 이력까지 나누려면 파일을 다시 써야 한다. 그래도 sink가 몇 분마다 최근 파티션에 커밋하는 한 그 파티션의 컴팩션은 sink 커밋과 겹칠 수 있다. 한 테이블로 돌아가려면 쓰는 쪽을 바꿔야 한다. sink는 변경 로그를 append로만 쓰고, 주기적인 MERGE가 본 테이블을 갱신하는 식이다.
+
 Q. Hive 테이블에서 `event_ts` 조건만 주면 아무 이득이 없나?
 
 파티션 단계에서는 없다. 모든 파티션을 나열하고 파일을 다 연다. 파일 안 단계에서는 row group의 `event_ts` 최솟값·최댓값으로 맞지 않는 row group을 건너뛰니 실제로 읽는 바이트는 줄 수 있다. 하지만 LIST와 footer 읽기는 파티션 수와 파일 수만큼 그대로 든다.
@@ -173,7 +203,8 @@ Q. Hive 테이블에서 `event_ts` 조건만 주면 아무 이득이 없나?
 - [Spark SQL: Hive tables, spark.sql.hive.metastorePartitionPruning](https://spark.apache.org/docs/latest/sql-data-sources-hive-tables.html)
 - [Amazon S3 ListObjectsV2](https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListObjectsV2.html), [Athena partition projection](https://docs.aws.amazon.com/athena/latest/ug/partition-projection.html)
 - [Amazon S3 pricing (requests)](https://aws.amazon.com/s3/pricing/), [Apache Iceberg: Maintenance](https://iceberg.apache.org/docs/latest/maintenance/)
+- [Amazon S3 Tables: Considerations for compaction](https://docs.aws.amazon.com/AmazonS3/latest/userguide/s3-tables-considerations.html)
 
 ## English summary
 
-Both Hive-style Parquet tables and Iceberg tables prune partitions, but they pick files from different sources. A Hive table keeps the partition value in the directory name, so the engine asks the metastore for matching partitions, lists each partition's S3 prefix, and opens every file footer; a filter on the raw timestamp alone prunes nothing unless the query also filters the `dt` column. Iceberg writes each file's partition value and column bounds into manifests at commit time, so planning reads the manifest list and manifests, skips whole manifests and files before opening them, and never lists directories. Hidden partitioning turns a filter on `event_ts` into a filter on `days(event_ts)`, and partition specs can change without rewriting old files. Iceberg's file skipping still depends on clustered data, column stats limits, and compact manifests. Iceberg wins on read requests, planning time and consistency, and pays for it with metadata maintenance; an append-only daily table with a fixed `dt` filter can stay Hive style with partition projection.
+Both Hive-style Parquet tables and Iceberg tables prune partitions, but they pick files from different sources. A Hive table keeps the partition value in the directory name, so the engine asks the metastore for matching partitions, lists each partition's S3 prefix, and opens every file footer; a filter on the raw timestamp alone prunes nothing unless the query also filters the `dt` column. Iceberg writes each file's partition value and column bounds into manifests at commit time, so planning reads the manifest list and manifests, skips whole manifests and files before opening them, and never lists directories. Hidden partitioning turns a filter on `event_ts` into a filter on `days(event_ts)`, and partition specs can change without rewriting old files. Iceberg's file skipping still depends on clustered data, column stats limits, and compact manifests. Iceberg wins on read requests, planning time and consistency, and pays for it with metadata maintenance; an append-only daily table with a fixed `dt` filter can stay Hive style with partition projection. For a large CDC upsert table where managed compaction kept failing while the sink committed every three minutes, I keep only the last seven days in Iceberg and read older history from a daily Hive dump. Queries combine the two with UNION ALL and use ROW_NUMBER to keep one row per payment, preferring the Iceberg row. UNION DISTINCT does not work here, because it only collapses rows that match in every column, and a refund after the dump changes the row.
