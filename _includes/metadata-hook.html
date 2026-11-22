@@ -80,6 +80,7 @@
     <div class="content ms-1 mt-2 mb-4">
       <div class="read-progress-text lh-lg"></div>
       <div class="progress"><div class="progress-bar"></div></div>
+      <a class="d-inline-block mt-2" href="{{ '/archives/' | relative_url }}?unread=1">안 읽은 글만 보기</a>
     </div>
   </section>
 </template>
@@ -180,6 +181,37 @@
           (a.closest('article.card') || a).classList.add('is-read');
         }
       });
+      {% if page.layout == 'archives' or page.layout == 'tag' or page.layout == 'category' %}
+      var FILTER_KEY = 'read-filter-unread';
+      var list = document.querySelector('main .content') || document.querySelector('main');
+      var items = Array.from(list.querySelectorAll('li')).filter(function (li) {
+        var a = li.querySelector('a[href*="/posts/"]');
+        return a && seen.has(new URL(a.href, location.href).pathname);
+      });
+      var onlyUnread = new URLSearchParams(location.search).has('unread');
+      try { if (!onlyUnread) onlyUnread = localStorage.getItem(FILTER_KEY) === '1'; } catch (e) {}
+      var sw = document.createElement('label');
+      sw.className = 'form-check form-switch my-3';
+      sw.innerHTML = '<input class="form-check-input" type="checkbox" role="switch"> <span class="form-check-label"></span>';
+      var box = sw.querySelector('input');
+      sw.querySelector('span').textContent = '안 읽은 글만 보기 (읽은 글 ' + items.length + '편 숨김)';
+      list.prepend(sw);
+      function applyFilter() {
+        items.forEach(function (li) { li.style.display = box.checked ? 'none' : ''; });
+        list.querySelectorAll('ul').forEach(function (ul) {
+          var visible = Array.from(ul.children).some(function (li) { return li.style.display !== 'none'; });
+          ul.style.display = visible ? '' : 'none';
+          var head = ul.previousElementSibling;
+          if (head && head.matches('time.year')) head.style.display = visible ? '' : 'none';
+        });
+      }
+      box.checked = onlyUnread;
+      box.onchange = function () {
+        try { localStorage.setItem(FILTER_KEY, box.checked ? '1' : '0'); } catch (e) {}
+        applyFilter();
+      };
+      applyFilter();
+      {% endif %}
       {% if page.layout == 'post' %}
       var here = location.pathname;
       var buttons = [];
