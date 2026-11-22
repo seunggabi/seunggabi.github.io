@@ -7,6 +7,8 @@ title: Portfolio
 
 데이터 엔지니어입니다. Kafka, Flink, Iceberg, Athena, Superset으로 이어지는 파이프라인에서 생긴 문제를 끝까지 따라가 원인을 찾고, 원인이 오픈소스에 있으면 그 프로젝트에 직접 고쳐서 올립니다.
 
+- 이메일: [seunggabi@gmail.com](mailto:seunggabi@gmail.com)
+- 이력서: [한국어](/resume/) · [English](/resume-en/) · PDF [한국어](/assets/pdf/seunggabi-resume-ko.pdf) · [English](/assets/pdf/seunggabi-resume-en.pdf)
 - GitHub: [seunggabi](https://github.com/seunggabi)
 - LinkedIn: [seunggabi](https://www.linkedin.com/in/seunggabi/)
 

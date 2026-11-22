@@ -7,6 +7,7 @@ mermaid: true
 image:
   path: /assets/img/posts/superset-epoch-us/pr-merged.webp
   alt: apache/superset PR 44500 머지 화면
+pin: true
 ---
 
 Superset 데이터셋 컬럼 설정에는 Datetime format이라는 칸이 있다. 시간 컬럼을 어떻게 해석할지 정하는 칸인데, 정수 epoch용으로 고를 수 있는 값은 `epoch_s`, `epoch_ms` 두 개뿐이었다.

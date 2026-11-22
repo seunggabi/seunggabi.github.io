@@ -3,7 +3,6 @@ title: "블로그를 열며"
 date: 2026-11-20 01:40:00 +0900
 categories: [Career, Retrospective]
 tags: [blog]
-pin: true
 ---
 
 데이터 엔지니어로 일하면서 장애를 따라가고, 원인을 찾고, 가끔은 오픈소스에 고쳐서 올린 기록을 한곳에 모으려고 이 블로그를 열었다.

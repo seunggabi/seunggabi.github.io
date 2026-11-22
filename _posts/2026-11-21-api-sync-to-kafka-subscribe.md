@@ -3,6 +3,7 @@ title: "배포할 때마다 끊기던 API 동기화를 Kafka 구독으로 바꾼
 date: 2026-11-21 14:10:00 +0900
 categories: [Streaming, Kafka]
 tags: [kafka, messaging, consumer-group, idempotency, ad-tech, deployment]
+pin: true
 ---
 
 이전 회사의 커머스 광고 플랫폼에는 데이터가 바뀌면 그 내용을 다른 서비스에 알려 주는 동기화 서버가 있었다. 처음에는 동기화 서버가 받는 쪽 서비스의 API를 비동기로 호출했다. 그런데 받는 쪽 서버를 배포하는 동안 들어간 호출은 끊겼고, 끊긴 변경은 그 서비스에 반영되지 않았다. 그래서 동기화 서버가 Kafka 토픽에 발행하고 받는 쪽 서비스가 구독하는 구조로 바꿨다. 바꾼 뒤로 배포 때문에 동기화가 빠진 일은 없었다.

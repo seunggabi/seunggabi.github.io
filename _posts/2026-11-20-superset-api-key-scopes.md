@@ -6,6 +6,7 @@ tags: [open-source, superset, mcp, rbac, code-review]
 image:
   path: /assets/img/posts/superset-api-key-scopes/pr.webp
   alt: apache/superset PR 45272 화면
+pin: true
 ---
 
 Superset에서 MCP용 API 키를 만드는 창을 열면 `superset:<resource>:<action>` 형태의 권한 범위(scope) 32개가 전부 나온다. 그런데 관리자가 아닌 사용자는 그중 대부분을 고를 수 없다. 서버가 "키에 담을 수 있는 범위는 발급하는 사람이 가진 권한 안쪽까지"라는 규칙으로 막기 때문이다.
