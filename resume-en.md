@@ -21,11 +21,11 @@ Data engineer with 10 years in software and 8+ years in data engineering. I buil
 ## Experience
 
 **Orange Square (WOWPASS)** · Data Engineer · Oct 2023 – Present
-- Designed and run a CDC pipeline that streams changes from hundreds of production MySQL tables into an Iceberg lakehouse on S3 Tables within a minute, using Debezium and MSK Connect, moving analytics queries off the production database
-- Built Kafka and Flink streaming and an app event log pipeline on Avro and Schema Registry (millions of events a day)
-- Run 1,000+ Airflow DAGs and EMR Spark batch; manage data infrastructure alarms as Terraform code
+- Designed and run a CDC pipeline that streams changes from 197 production MySQL tables into an Iceberg lakehouse on S3 Tables on a 3-minute commit cycle (6 partitions and replication factor 3 per topic, Parquet with zstd, 128 MB target files), using Debezium and MSK Connect, moving analytics queries off the production database
+- Built Kafka and Flink streaming and an app event log pipeline on Avro and Schema Registry (about 1.7 million events a day; producers with acks=all, idempotence and lz4)
+- Run 1,300+ Airflow DAGs (18 standard DAG factories, about 6,000 SQL jobs) and EMR Spark batch; manage 6 MSK and EMR alarm types as Terraform modules
 - Introduced a DataHub catalog, built an internal KPI dashboard, and help operate Superset on Athena (100+ dashboards, about 50 users)
-- Built server APIs for external payment and transit card integrations; automated the development workflow with GitHub Actions
+- Built server APIs for external payment and transit card integrations; automated the development workflow with 25 GitHub Actions workflows (review assignment, release promotion, dependency audit)
 
 **TMAP Mobility** · Data Engineer · Oct 2022 – Oct 2023
 - Proposed and adopted a monorepo with a shared core module that brought dozens of batch jobs together and cut new job setup from 3 days to a few hours; moved Airflow DAGs to repository-based versioning

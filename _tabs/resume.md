@@ -22,11 +22,11 @@ seunggabi@gmail.com · [LinkedIn](https://www.linkedin.com/in/seunggabi/) · [Gi
 ## 경력
 
 **오렌지스퀘어 (WOWPASS)** · Data Engineer · 2023.10 – 현재
-- 운영 MySQL 테이블 수백 개의 변경분을 Debezium과 MSK Connect로 받아 Iceberg 레이크하우스(S3 Tables)에 1분 이내로 반영하는 CDC 파이프라인을 설계·운영해, 분석 쿼리를 운영 DB에서 분리
-- Kafka·Flink 스트리밍과 Avro·Schema Registry 기반 앱 이벤트 로그 파이프라인 구축(하루 수백만 건)
-- Airflow DAG 1,000여 개와 EMR Spark 배치 운영, 데이터 인프라 알람을 Terraform 코드로 관리
+- 운영 MySQL 테이블 197개의 변경분을 Debezium과 MSK Connect로 받아 Iceberg 레이크하우스(S3 Tables)에 3분 커밋 주기로 반영하는 CDC 파이프라인(토픽당 파티션 6개·복제 3, Parquet zstd, 목표 파일 128MB)을 설계·운영해, 분석 쿼리를 운영 DB에서 분리
+- Kafka·Flink 스트리밍과 Avro·Schema Registry 기반 앱 이벤트 로그 파이프라인 구축(하루 약 170만 건, 프로듀서 acks=all·idempotence·lz4)
+- Airflow DAG 1,300여 개(표준 DAG 팩토리 18종, SQL 잡 약 6,000개)와 EMR Spark 배치 운영, MSK·EMR 알람 6종을 Terraform 모듈로 관리
 - DataHub 카탈로그 도입, 사내 KPI 대시보드 개발, Athena 위 Superset 운영 참여(대시보드 100여 개, 사용자 약 50명)
-- 외부 결제·교통카드 연동 서버 API 개발, GitHub Actions로 개발 프로세스 자동화
+- 외부 결제·교통카드 연동 서버 API 개발, GitHub Actions 25개로 리뷰·릴리스 승격·의존성 감사 등 개발 프로세스 자동화
 
 **티맵모빌리티** · Data Engineer · 2022.10 – 2023.10
 - 모노 레포와 공용 core 모듈 도입을 제안하고 적용해 배치 잡 수십 개를 통합, 신규 잡 개발 기간을 3일에서 몇 시간으로 단축. Airflow DAG를 저장소 기반으로 버전 관리
