@@ -1,7 +1,6 @@
 ---
-published: false
 title: "새 컴퓨터에 Claude Code 환경 그대로 옮기기"
-date: 2026-11-23 21:00:00 +0900
+date: 2026-11-23 15:44:00 +0900
 categories: [AI & Tooling, Claude Code]
 tags: [claude-code, plugin, skill, mcp, setup]
 description: "Claude Code에 설치해 쓰는 플러그인 14개, 스킬 32개, MCP 서버 6개를 새 컴퓨터에서 순서대로 다시 설치하는 명령을 정리한다."
