@@ -38,4 +38,4 @@ jobs:
             \-\-no-enforce-https \
             \-\-only-4xx \
             \-\-ignore-status-codes "403,429,999" \
-            \-\-ignore-urls "/^http:\/\/127.0.0.1/,/^http:\/\/0.0.0.0/,/^http:\/\/localhost/"
+            \-\-ignore-urls "/^https:\/\/fonts\.g(static|oogleapis)\.com\/?$/,/^http:\/\/127.0.0.1/,/^http:\/\/0.0.0.0/,/^http:\/\/localhost/"
