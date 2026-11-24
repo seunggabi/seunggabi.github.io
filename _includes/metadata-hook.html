@@ -786,6 +786,7 @@
           '<dt><kbd>p</kbd></dt><dd>이전(오래된) 글</dd>' +
           '<dt><kbd>r</kbd></dt><dd>안 읽은 글 랜덤 이동</dd>' +
           '<dt><kbd>t</kbd></dt><dd>맨 위로</dd>' +
+          '<dt><kbd>w</kbd></dt><dd>넓게 보기 켜기/끄기</dd>' +
           '<dt><kbd>?</kbd></dt><dd>이 도움말</dd></dl>' +
           '<button type="button" class="btn btn-sm btn-primary">닫기</button></div>';
         help.addEventListener('click', function (e) { if (e.target === help || e.target.tagName === 'BUTTON') close(); });
@@ -821,10 +822,51 @@
           case 'p': go = navLink('older'); break;
           case 'r': randomPost(); break;
           case 't': window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); break;
+          case 'w': if (window.toggleWide) window.toggleWide(); break;
           case '?': e.preventDefault(); open(); break;
         }
         if (go && go.href) location.href = go.href;
       });
+    });
+  })();
+</script>
+<!-- Wide view: a topbar button (and the w key) hides both sidebars on large screens so the post body gets the full width. Stored in localStorage. -->
+<style>
+  #wide-toggle { display: none; }
+  @media (min-width: 992px) {
+    #wide-toggle { display: block; }
+    html.wide #sidebar, html.wide #panel-wrapper { display: none !important; }
+    html.wide #main-wrapper { margin-left: 0 !important; }
+    html.wide #main-wrapper > .container { max-width: 1180px; }
+    html.wide #main-wrapper .row > .col-xl-9 { flex: 0 0 100%; width: 100%; max-width: 100%; }
+  }
+</style>
+<script>
+  (function () {
+    var KEY = 'wide-view', root = document.documentElement;
+    try { if (localStorage.getItem(KEY) === '1') root.classList.add('wide'); } catch (e) {}
+    document.addEventListener('DOMContentLoaded', function () {
+      var topbar = document.getElementById('topbar');
+      if (!topbar) return;
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.id = 'wide-toggle';
+      btn.className = 'btn btn-link';
+      function sync() {
+        var on = root.classList.contains('wide');
+        btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+        btn.setAttribute('aria-label', on ? '사이드바 보기' : '넓게 보기');
+        btn.title = (on ? '사이드바 보기' : '넓게 보기') + ' (w)';
+        btn.innerHTML = '<i class="fas fa-fw ' + (on ? 'fa-down-left-and-up-right-to-center' : 'fa-up-right-and-down-left-from-center') + '"></i>';
+      }
+      window.toggleWide = function () {
+        var on = root.classList.toggle('wide');
+        try { localStorage.setItem(KEY, on ? '1' : '0'); } catch (e) {}
+        sync();
+      };
+      btn.addEventListener('click', window.toggleWide);
+      sync();
+      topbar.appendChild(btn);
     });
   })();
 </script>
