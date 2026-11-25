@@ -42,6 +42,8 @@ title: Portfolio
 |---|---|---|---|
 | Apache Superset | 다운로드 사유 기록 기능 제안(SIP-230), dev@ 논의와 투표 진행 | 투표 중 | [글](/posts/superset-download-reason-sip/) |
 | Apache Iceberg | Kafka Connect id-columns 조회에 대소문자 무시 옵션 적용, 에러 메시지 보강 | 리뷰 대기 | [#19042](https://github.com/apache/iceberg/pull/19042) |
+| Apache Airflow | `max_active_runs=1`·`depends_on_past` DAG가 멈추는 원인 두 가지 수정: queued로 바꿀 때 정렬 키 초기화(#77603), 다중 스케줄러에서 DAG 행 잠금(#77604). 같은 정렬 문제를 #64109에 재현 테스트와 함께 코멘트 | 리뷰 대기 | [글](/posts/airflow-max-active-runs-deadlock/) |
+| Apache Superset | 모달 안 Select 드롭다운이 Save 버튼을 덮지 않게 위로 열고 멀티 셀렉트에 Done 추가(#46572), master 린트 오류 수정(#46582) | 리뷰 대기 | [글](/posts/superset-select-modal-footer/) |
 | AWS EMR TCO 시뮬레이터 | YARN 작업 기록 수집 스크립트가 활성 EMR 클러스터를 모두 돌도록 | 리뷰 대기 | [글](/posts/emr-yarn-log-collector/) |
 
 ## 사이드 프로젝트
