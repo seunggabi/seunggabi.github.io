@@ -13,14 +13,14 @@ permalink: /resume-en/
 }
 </style>
 
-**Seunggab Kim** · Data Engineer<br>
+**Seunggab Kim** · Data Engineering Team Lead<br>
 seunggabi@gmail.com · [LinkedIn](https://www.linkedin.com/in/seunggabi/) · [GitHub](https://github.com/seunggabi) · [Blog](https://seunggabi.github.io/) · [한국어](/resume/) · [PDF](/assets/pdf/seunggabi-resume-en.pdf)
 
 Data engineer with 10 years in software and 8+ years in data engineering. I build and run data platforms that go from CDC and streaming to a lakehouse and BI. When the root cause is in open source, I fix it upstream; my changes are merged into Apache Spark, Superset and Airflow.
 
 ## Experience
 
-**Orange Square (WOWPASS)** · Data Engineer · Oct 2023 – Present
+**Orange Square (WOWPASS)** · Data Engineering Team Lead · Oct 2023 – Present
 - Designed and run a CDC pipeline that streams changes from 197 production MySQL tables into an Iceberg lakehouse on S3 Tables on a 3-minute commit cycle (6 partitions and replication factor 3 per topic, Parquet with zstd, 128 MB target files), using Debezium and MSK Connect, moving analytics queries off the production database
 - Built Kafka and Flink streaming and an app event log pipeline on Avro and Schema Registry (about 1.7 million events a day; producers with acks=all, idempotence and lz4)
 - Run 1,300+ Airflow DAGs (18 standard DAG factories, about 6,000 SQL jobs) and EMR Spark batch; manage 6 MSK and EMR alarm types as Terraform modules

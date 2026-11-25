@@ -14,14 +14,14 @@ title: Resume
 }
 </style>
 
-**김승갑 (Seunggab Kim)** · Data Engineer<br>
+**김승갑 (Seunggab Kim)** · Data Engineering Team Lead<br>
 seunggabi@gmail.com · [LinkedIn](https://www.linkedin.com/in/seunggabi/) · [GitHub](https://github.com/seunggabi) · [Blog](https://seunggabi.github.io/) · [English](/resume-en/) · [PDF](/assets/pdf/seunggabi-resume-ko.pdf)
 
 10년 차 개발자이고, 그중 8년 넘게 데이터 엔지니어링을 했습니다. CDC, 스트리밍, 레이크하우스로 이어지는 데이터 플랫폼을 만들고 운영합니다. 문제의 원인이 오픈소스에 있으면 업스트림에 직접 고쳐서 올리고, Apache Spark·Superset·Airflow에 머지됐습니다.
 
 ## 경력
 
-**오렌지스퀘어 (WOWPASS)** · Data Engineer · 2023.10 – 현재
+**오렌지스퀘어 (WOWPASS)** · Data Engineering Team Lead · 2023.10 – 현재
 - 운영 MySQL 테이블 197개의 변경분을 Debezium과 MSK Connect로 받아 Iceberg 레이크하우스(S3 Tables)에 3분 커밋 주기로 반영하는 CDC 파이프라인(토픽당 파티션 6개·복제 3, Parquet zstd, 목표 파일 128MB)을 설계·운영해, 분석 쿼리를 운영 DB에서 분리
 - Kafka·Flink 스트리밍과 Avro·Schema Registry 기반 앱 이벤트 로그 파이프라인 구축(하루 약 170만 건, 프로듀서 acks=all·idempotence·lz4)
 - Airflow DAG 1,300여 개(표준 DAG 팩토리 18종, SQL 잡 약 6,000개)와 EMR Spark 배치 운영, MSK·EMR 알람 6종을 Terraform 모듈로 관리
