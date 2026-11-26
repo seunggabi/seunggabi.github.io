@@ -46,8 +46,8 @@ title: Portfolio
 | Apache Airflow | `max_active_runs=1`·`depends_on_past` DAG가 멈추는 원인 두 가지 수정: queued로 바꿀 때 정렬 키 초기화(#77603), 다중 스케줄러에서 DAG 행 잠금(#77604). 같은 정렬 문제를 #64109에 재현 테스트와 함께 코멘트 | 리뷰 대기 | [글](/posts/airflow-max-active-runs-deadlock/) |
 | Apache Superset | 모달 안 Select 드롭다운이 Save 버튼을 덮지 않게 위로 열고 멀티 셀렉트에 Done 추가(#46572) | 리뷰 대기 | [글](/posts/superset-select-modal-footer/) |
 | Apache Superset | 대시보드를 편집 모드에서 저장할 때 viewer 지정이 사라지던 문제 수정. 같은 버그를 고치던 다른 기여자가 테스트 후 확인 | 리뷰 대기 | [#46239](https://github.com/apache/superset/pull/46239) |
-| Apache Airflow | DAG 목록에서 태그와 검색어로 DAG를 제외하는 필터(`exclude_tags`, `-` 접두 검색어) | 리뷰 대기 | [#77622](https://github.com/apache/airflow/pull/77622) |
-| Apache Flink | `flink run`, `flink info`가 원격 URI(`s3://`, `hdfs://` 등)의 잡 JAR를 받아 캐시하도록. dev@ 논의 중이라 draft | 논의 중 | [#30140](https://github.com/apache/flink/pull/30140) |
+| Apache Airflow | DAG 목록에서 태그와 검색어로 DAG를 제외하는 필터(`exclude_tags`, `-` 접두 검색어, #77622) | 리뷰 대기 | [글](/posts/airflow-dag-list-exclude/) |
+| Apache Flink | `flink run`, `flink info`가 원격 URI(`s3://`, `hdfs://` 등)의 잡 JAR를 받아 캐시하도록(#30140, FLINK-6405). dev@ 논의 중이라 draft | 논의 중 | [글](/posts/flink-cli-remote-jar/) |
 | AWS EMR TCO 시뮬레이터 | YARN 작업 기록 수집 스크립트가 활성 EMR 클러스터를 모두 돌도록 | 리뷰 대기 | [글](/posts/emr-yarn-log-collector/) |
 
 ## 사이드 프로젝트
