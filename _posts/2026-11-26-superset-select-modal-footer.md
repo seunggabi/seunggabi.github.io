@@ -83,8 +83,8 @@ Found 2292 warnings and 1 error.
 
 두 PR이 엇갈린 결과였다. [#46317](https://github.com/apache/superset/pull/46317)이 `import/no-named-as-default`를 에러로 올렸고, [#45824](https://github.com/apache/superset/pull/45824)가 `redux-mock-store`의 default export를 `configureStore`라는 이름으로 가져오는 테스트를 추가했다. 그 이름은 같은 모듈의 named export이기도 하다. 두 PR 모두 각자의 CI는 통과했다.
 
-[#46582](https://github.com/apache/superset/pull/46582)는 import 이름을 `createMockStore`로 바꾼다. 같은 폴더의 `UsersList.test.tsx`를 비롯해 저장소의 다른 테스트 대부분이 쓰는 이름이다. 두 줄짜리 변경이고 동작은 그대로다.
+[#46582](https://github.com/apache/superset/pull/46582)는 import 이름을 `createMockStore`로 바꾼다. 같은 폴더의 `UsersList.test.tsx`를 비롯해 저장소의 다른 테스트 대부분이 쓰는 이름이다. 두 줄짜리 변경이고 동작은 그대로다. 11월 26일에 승인을 받아 머지됐다.
 
 ## English summary
 
-In Superset's user edit modal, the Roles multi-select dropdown covered the Cancel and Save buttons. Inside a modal, the popup renders in the modal container, which also holds the footer. The popup stays inside the viewport, so antd never flips it. My PR #46572 measures the space between the select and the footer when the popup opens. If the popup does not fit below and there is more room above, it opens upward. It also adds a Done button to multi-select popups. A lint error on master blocked CI, so I fixed it in #46582. I measure the direction only once per open, so the list does not jump while someone picks options.
+In Superset's user edit modal, the Roles multi-select dropdown covered the Cancel and Save buttons. Inside a modal, the popup renders in the modal container, which also holds the footer. The popup stays inside the viewport, so antd never flips it. My PR #46572 measures the space between the select and the footer when the popup opens. If the popup does not fit below and there is more room above, it opens upward. It also adds a Done button to multi-select popups. A lint error on master blocked CI, so I fixed it in #46582, which is now merged. I measure the direction only once per open, so the list does not jump while someone picks options.
