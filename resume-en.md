@@ -43,7 +43,7 @@ Data engineer with 10 years in software and 8+ years in data engineering. I buil
 
 ## Open Source
 
-- **Apache Superset** (3 merged): `epoch_us` dataset time format, MCP API key scope limits, CI fix; proposed SIP-230 (download reason logging)
+- **Apache Superset** (4 merged): `epoch_us` dataset time format, MCP API key scope limits, CI fixes; proposed SIP-230 (download reason logging)
 - **Apache Spark**: added `SparkSession.builder.config(Map)`, shipped in 3.4.0
 - **Apache Airflow**: `TableauOperator` template fields; Helm chart release name length fix
 - **PyAthena**: complex type (MAP, ARRAY, STRUCT) parsing fix · **Apache Iceberg**: Kafka Connect improvement in review

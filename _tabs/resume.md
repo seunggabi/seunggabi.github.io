@@ -44,7 +44,7 @@ seunggabi@gmail.com · [LinkedIn](https://www.linkedin.com/in/seunggabi/) · [Gi
 
 ## 오픈소스
 
-- **Apache Superset** (머지 3건): 데이터셋 시간 포맷 `epoch_us` ([글](/posts/superset-epoch-us/)), MCP API 키 발급 범위 제한 ([글](/posts/superset-api-key-scopes/)), CI 수정. 다운로드 사유 기록 제안 SIP-230 ([글](/posts/superset-download-reason-sip/))
+- **Apache Superset** (머지 4건): 데이터셋 시간 포맷 `epoch_us` ([글](/posts/superset-epoch-us/)), MCP API 키 발급 범위 제한 ([글](/posts/superset-api-key-scopes/)), CI 수정. 다운로드 사유 기록 제안 SIP-230 ([글](/posts/superset-download-reason-sip/))
 - **Apache Spark**: `SparkSession.builder.config(Map)` 추가, 3.4.0 포함 ([글](/posts/spark-session-config-map/))
 - **Apache Airflow**: `TableauOperator` 템플릿 필드 ([글](/posts/airflow-tableau-template-fields/)), Helm 차트 release 이름 길이 수정 ([글](/posts/airflow-helm-release-name/))
 - **PyAthena**: Athena 복합 타입 파싱 수정 ([글](/posts/pyathena-complex-types/)) · **Apache Iceberg**: Kafka Connect 개선 PR 리뷰 중
