@@ -5,7 +5,7 @@ categories: [BI & Serving, Superset]
 tags: [open-source, superset, react, antd, frontend]
 description: "Superset 모달에서 Roles 드롭다운이 Save 버튼을 덮던 원인과, 공통 Select가 열릴 때 팝업 방향을 정하도록 바꾼 과정(PR 46572). CI를 막은 master 린트 오류(PR 46582)도 함께 고쳤다."
 image:
-  path: /assets/img/posts/superset-select-modal-footer/before-open.webp
+  path: /assets/img/posts/superset-select-modal-footer/thumb.webp
   alt: Superset Edit User 모달에서 Roles 드롭다운이 Save 버튼을 덮은 화면
 ---
 

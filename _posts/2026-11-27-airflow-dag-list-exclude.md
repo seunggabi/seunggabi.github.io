@@ -5,7 +5,7 @@ categories: [Orchestration, Airflow]
 tags: [open-source, airflow, fastapi, sqlalchemy, react]
 description: "Airflow 3 DAG 목록에서 태그(exclude_tags)와 검색어(-term)로 DAG를 제외하게 한 PR 77622. NOT EXISTS로 태그 없는 DAG를 남기는 이유와, - 접두를 DAG 이름 검색에만 켠 이유를 다룬다."
 image:
-  path: /assets/img/posts/airflow-dag-list-exclude/exclude-tags.webp
+  path: /assets/img/posts/airflow-dag-list-exclude/thumb.webp
   alt: Airflow DAG 목록에서 Exclude Tags 필터로 example 태그 DAG를 뺀 화면
 ---
 

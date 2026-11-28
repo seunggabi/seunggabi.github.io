@@ -5,7 +5,7 @@ categories: [Batch & Query, Spark]
 tags: [open-source, spark, scala, kotlin, api-design]
 description: "Kotlin에서 YAML 설정 맵으로 SparkSession을 만들 때 타입별 분기가 필요했던 불편에서 출발해, Spark 3.4.0에 config(Map)이 들어가기까지의 과정을 정리한다."
 image:
-  path: /assets/img/posts/spark-session-config-map/jira.webp
+  path: /assets/img/posts/spark-session-config-map/thumb.webp
   alt: SPARK-40163 JIRA 화면
 pin: true
 ---
