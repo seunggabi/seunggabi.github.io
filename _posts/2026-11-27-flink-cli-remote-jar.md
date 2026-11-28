@@ -53,12 +53,19 @@ JAR 하나로 잡 여러 개를 내는 경우가 많다. 명령마다 같은 JAR
 
 ```java
 FileStatus remoteStatus = remote.getFileSystem().getFileStatus(remote);
+if (remoteStatus.getModificationTime() <= 0) {
+    return Optional.empty(); // 캐시하지 않고 명령마다 받는다
+}
 String stamp = remoteStatus.getLen() + " " + remoteStatus.getModificationTime();
 
 Path entry = Files.createDirectories(root.resolve(sha256Hex(jarUri)));
 ```
 
 URI의 SHA-256으로 디렉터리를 나누고, Flink `FileSystem`에서 읽은 원격 파일의 길이와 수정 시각을 `.status` 파일에 적는다. 다음 명령에서 두 값이 같으면 다시 받지 않는다. `http(s)://`는 Flink `FileSystem`을 거치지 않고 HTTP 전용 fetcher로 받는다. 비교할 수정 시각이 없으니 캐시하지 않는다.
+
+최신인지 확인은 명령마다 원격 파일 정보를 다시 읽어서 한다. 일정 시간 동안 확인을 건너뛰는 TTL은 없다. 다만 파일 내용은 비교하지 않는다. Flink `FileSystem` API의 `FileStatus`에는 체크섬이나 ETag가 없고, 이 API만으로 내용을 비교하려면 JAR를 받아야 해서 캐시를 두는 의미가 없어진다. 그래서 길이와 수정 시각이 모두 같으면 같은 파일로 본다. `file://` 경로에 `cp -p`를 쓰는 것처럼 수정 시각을 보존하는 방법으로 길이까지 같은 JAR를 덮어쓰면, 예전 JAR를 캐시해 둔 CLI는 그 JAR를 실행한다. 이렇게 올려야 한다면 새 파일 이름을 쓴다.
+
+파일 시스템이 수정 시각을 주지 않으면(값이 0 이하) 비교할 값이 길이밖에 남지 않는다. 이런 파일은 캐시하지 않고 명령마다 받는다. 이 처리와 문서의 안내 문장은 11월 28일에 추가했다.
 
 `ArtifactFetchManager`는 받을 디렉터리에 같은 이름의 파일이 있으면 다시 받지 않는다. 디렉터리를 재사용하면 원격 JAR가 바뀌어도 옛 JAR가 돈다. 그래서 캐시를 쓰지 않을 때는 명령마다 새 디렉터리에 받는다. 받은 파일은 명령이 끝나면 지우고, attached 모드로 잡을 기다리다 CLI가 중단돼도 `deleteOnExit`가 지운다.
 
@@ -95,10 +102,10 @@ return attributes.owner().equals(currentUser)
 | 캐시 | 2개 (재사용, 갱신) |
 | 권한 검사 | 2개 (보안) |
 
-새 테스트를 포함한 `CliFrontend*Test` 96개가 모두 통과했다. 2.3.0 배포판에 `flink-s3-fs-hadoop` 플러그인을 넣고 실제 S3 버킷으로도 돌렸다. 첫 `flink run s3://...`은 JAR를 받아 `main()`까지 실행했고, 두 번째 실행은 받지 않고 `Reusing cached job JAR ...` 로그를 남겼다. 캐시 디렉터리는 `drwx------`였다.
+11월 28일에는 테스트 두 개를 더했다. 위 표는 이 두 개를 더하기 전 결과다. 수정 시각은 그대로 두고 길이만 바꾸면 다시 받는지, 수정 시각이 없는 JAR를 캐시하지 않는지 본다. 뒤의 테스트는 수정 시각 확인 코드를 빼면 실패한다. 새 테스트를 포함한 `CliFrontend*Test` 98개가 모두 통과했다. 2.3.0 배포판에 `flink-s3-fs-hadoop` 플러그인을 넣고 실제 S3 버킷으로도 돌렸다. 첫 `flink run s3://...`은 JAR를 받아 `main()`까지 실행했고, 두 번째 실행은 받지 않고 `Reusing cached job JAR ...` 로그를 남겼다. 캐시 디렉터리는 `drwx------`였다.
 
-문서는 `deployment/cli.md` 영문과 중문에 URI 형식과 캐시 규칙을 적었다. PR은 11월 26일에 draft로 열었다. CLI 동작이 바뀌는 일이라 FLIP이 필요한지부터 정해야 한다. 그래서 dev@ 메일링 리스트에 "[DISCUSS] FLINK-6405: Let flink run fetch the job JAR from a remote URI"를 보내고 JIRA에 담당을 요청했다.
+문서는 `deployment/cli.md` 영문과 중문에 URI 형식과 캐시 규칙을 적었다. PR은 11월 26일에 draft로 열었다. CLI 동작이 바뀌는 일이라 FLIP이 필요한지부터 정해야 한다. 그래서 dev@ 메일링 리스트에 "[DISCUSS] FLINK-6405: Let flink run fetch the job JAR from a remote URI"를 보내고 JIRA에 담당을 요청했다. 11월 28일에는 draft를 풀고 리뷰를 받을 수 있게 열었다.
 
 ## English summary
 
-Since 2017, FLINK-6405 has asked for `flink run` to load a job JAR from S3. Application Mode can already fetch remote JARs, but the CLI for session clusters only takes local paths. My draft PR #30140 lets `flink run` and `flink info` fetch the JAR on the client, using the `ArtifactFetchManager` that Application Mode uses. JARs from `s3://` or `hdfs://` are cached, so several jobs from one JAR download it only once. The CLI runs the cached code, so the cache is used only when its directory belongs to the current user and nobody else can access it.
+Since 2017, FLINK-6405 has asked for `flink run` to load a job JAR from S3. Application Mode can already fetch remote JARs, but the CLI for session clusters only takes local paths. My PR #30140 lets `flink run` and `flink info` fetch the JAR on the client, using the `ArtifactFetchManager` that Application Mode uses. JARs from `s3://` or `hdfs://` are cached, so several jobs from one JAR download it only once. A cached copy is checked against the remote length and modification time on every command; the content itself is not compared, and a file without a modification time is not cached. The CLI runs the cached code, so the cache is used only when its directory belongs to the current user and nobody else can access it.
