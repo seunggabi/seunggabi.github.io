@@ -27,7 +27,7 @@ title: Portfolio
 
 | 프로젝트 | 기여 | 결과 | 글 |
 |---|---|---|---|
-| Apache Spark | `SparkSession.builder.config(Map)` 추가. Spark 3.4.0에 포함, PySpark도 같은 API를 따라 추가 | 2022-08 커밋 | [글](/posts/spark-session-config-map/) |
+| Apache Spark | `SparkSession.builder.config(Map)` 추가. Spark 3.4.0에 포함, PySpark도 같은 API를 따라 추가 | 2022-08 머지 | [글](/posts/spark-session-config-map/) |
 | Apache Superset | 데이터셋 시간 포맷에 마이크로초 epoch(`epoch_us`) 지원 추가. 엔진별 SQL, 필터, 검증까지 21개 파일 | 2026-09 머지 | [글](/posts/superset-epoch-us/) |
 | Apache Superset | MCP API 키 화면이 발급 가능한 범위만 보여 주도록 수정, 500을 400으로 | 2026-11 머지 | [글](/posts/superset-api-key-scopes/) |
 | Apache Superset | master CI를 깨뜨린 import 누락과 번역 템플릿 수정 | 2026-09 머지 | [글](/posts/superset-download-reason-sip/) |
