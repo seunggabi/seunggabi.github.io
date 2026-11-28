@@ -994,3 +994,14 @@
     panel.appendChild(sec);
   });
 </script>
+<!-- Post body links open in a new tab. Skips in-page anchors and image lightbox links. -->
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.content a[href]').forEach(function (a) {
+      var href = a.getAttribute('href');
+      if (href.charAt(0) === '#' || a.classList.contains('popup') || a.target) return;
+      a.target = '_blank';
+      a.rel = 'noopener';
+    });
+  });
+</script>
