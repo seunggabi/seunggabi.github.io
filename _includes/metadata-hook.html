@@ -299,6 +299,19 @@
         });
       }
       listeners.push(updateProgress, updateDim);
+      function sortSwitch() {
+        var SORT_KEY = 'list-sort-oldest';
+        var el = document.createElement('label');
+        el.className = 'ux-switch';
+        el.title = '오래된 글부터 보기';
+        el.innerHTML = '<input type="checkbox" role="switch"><span class="ux-track"></span><span>오래된 글부터</span>';
+        var input = el.querySelector('input');
+        try { input.checked = localStorage.getItem(SORT_KEY) === '1'; } catch (e) {}
+        input.addEventListener('change', function () {
+          try { localStorage.setItem(SORT_KEY, input.checked ? '1' : '0'); } catch (e) {}
+        });
+        return el;
+      }
       updateProgress();
       updateDim();
       {% if page.layout == 'home' %}
@@ -313,20 +326,28 @@
         homeSw.title = '전체 페이지에서 안 읽은 글만 모아 봅니다';
         homeSw.innerHTML = '<input type="checkbox" role="switch"><span class="ux-track"></span><span>안 읽은 글만 보기</span><span class="ux-count"></span>';
         var homeBox = homeSw.querySelector('input');
+        var homeSort = sortSwitch();
+        homeSort.classList.add('ms-3');
+        var homeItems = Array.from(unreadWrap.children);
         homeList.before(homeSw);
+        homeSw.after(homeSort);
         homeList.after(unreadWrap);
         function applyHome() {
           var unread = 0;
-          Array.from(unreadWrap.children).forEach(function (li) {
+          var oldest = homeSort.querySelector('input').checked;
+          (oldest ? homeItems.slice().reverse() : homeItems).forEach(function (li) {
             var read = seen.has(new URL(li.querySelector('a').href, location.href).pathname);
-            li.style.display = read ? 'none' : '';
+            li.style.display = homeBox.checked && read ? 'none' : '';
             if (!read) unread++;
+            unreadWrap.appendChild(li);
           });
           homeSw.querySelector('.ux-count').textContent = unread + '편';
-          unreadWrap.hidden = !homeBox.checked;
-          homeList.style.display = homeBox.checked ? 'none' : '';
-          if (pager) pager.style.display = homeBox.checked ? 'none' : '';
+          var flat = homeBox.checked || oldest;
+          unreadWrap.hidden = !flat;
+          homeList.style.display = flat ? 'none' : '';
+          if (pager) pager.style.display = flat ? 'none' : '';
         }
+        homeSort.querySelector('input').addEventListener('change', applyHome);
         try { homeBox.checked = localStorage.getItem(HOME_KEY) === '1'; } catch (e) {}
         homeBox.onchange = function () {
           try { localStorage.setItem(HOME_KEY, homeBox.checked ? '1' : '0'); } catch (e) {}
@@ -367,6 +388,28 @@
           if (head && head.matches('time.year')) head.style.display = visible ? '' : 'none';
         });
       }
+      var listSort = sortSwitch();
+      listSort.classList.add('ms-3');
+      sw.after(listSort);
+      var groups = new Map();
+      items.forEach(function (li) {
+        if (!groups.has(li.parentNode)) groups.set(li.parentNode, []);
+        groups.get(li.parentNode).push(li);
+      });
+      var years = Array.from(list.querySelectorAll('time.year')).map(function (t) { return [t, t.nextElementSibling]; });
+      var yearParent = years.length ? years[0][0].parentNode : null;
+      function applySort() {
+        var oldest = listSort.querySelector('input').checked;
+        groups.forEach(function (lis, parent) {
+          (oldest ? lis.slice().reverse() : lis).forEach(function (li) { parent.appendChild(li); });
+        });
+        if (yearParent) (oldest ? years.slice().reverse() : years).forEach(function (pair) {
+          yearParent.appendChild(pair[0]);
+          if (pair[1]) yearParent.appendChild(pair[1]);
+        });
+      }
+      listSort.querySelector('input').addEventListener('change', applySort);
+      applySort();
       box.checked = onlyUnread;
       box.onchange = function () {
         try { localStorage.setItem(FILTER_KEY, box.checked ? '1' : '0'); } catch (e) {}
