@@ -162,6 +162,7 @@
 {% endif %}
 <template id="sidebar-extra">
   <p class="sidebar-intro">Data Engineer<br>Batch · Streaming · CDC · Lakehouse<br>Spark · Airflow · Kafka · Flink · EMR</p>
+  <div class="sidebar-intro sync-box"><button type="button" class="ux-pill" data-random title="안 읽은 글 중에서 하나 (r)"><i class="fas fa-shuffle"></i><span>아무 글이나 읽기</span></button></div>
   <div class="sidebar-intro sync-box"><button type="button" id="auth-btn" class="ux-pill" hidden></button><div id="sync-hint" class="sync-hint" hidden></div></div>
 </template>
 {%- assign tag_pairs = "" | split: "" -%}
@@ -331,6 +332,13 @@
         var homeItems = Array.from(unreadWrap.children);
         homeList.before(homeSw);
         homeSw.after(homeSort);
+        var homeRandom = document.createElement('button');
+        homeRandom.type = 'button';
+        homeRandom.className = 'ux-pill ms-3 mb-3';
+        homeRandom.title = '안 읽은 글 중에서 하나 (r)';
+        homeRandom.setAttribute('data-random', '');
+        homeRandom.innerHTML = '<i class="fas fa-shuffle"></i><span>아무 글이나 읽기</span>';
+        homeSort.after(homeRandom);
         homeList.after(unreadWrap);
         function applyHome() {
           var unread = 0;
@@ -846,6 +854,9 @@
         help.hidden = true;
         if (opener && opener.focus) opener.focus();
       }
+      document.addEventListener('click', function (e) {
+        if (e.target.closest && e.target.closest('[data-random]')) randomPost();
+      });
       document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') { close(); return; }
         if (e.ctrlKey || e.metaKey || e.altKey || typing(e.target)) return;
